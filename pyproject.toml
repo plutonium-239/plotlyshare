@@ -1,0 +1,27 @@
+[build-system]
+requires = [“setuptools>=61”]
+build-backend = “setuptools.build_meta”
+
+[project]
+name = "plotlyshare"
+version = "1.0.0"
+author = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
+description = "Link-based sharing of `plotly` plots with a private web app"
+long_description = "README.md"
+requires-python = ">=3.7"
+url = GITHUB REPOSITORY LINK
+classifiers =
+[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+	"rich",
+	"plotly",
+	"wonderwords"
+]
+keywords = ["plotly", "interactive", "plot"]
+
+[project.urls]
+Homepage = ""
