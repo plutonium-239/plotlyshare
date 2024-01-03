@@ -6,8 +6,8 @@ This requires a free account on deta space: https://deta.space, which is essenti
 
 The idea is to preserve the interactivity and responsiveness of `plotly` plots with the ease of **link-based sharing** and without all the hassle of sending an html file, or worse, a static image/document.
 
-To use this, first run `python -m plotlyshare setup`
-and then whenever making a plot,
+To use this, first run `python -m plotlyshare setup` and install [plotlyshare on deta space](https://deta.space/discovery/@pu239/plotlyshare).
+And then whenever making a plot,
 
 ```py
 ...

@@ -1,17 +1,15 @@
 [build-system]
-requires = [“setuptools>=61”]
-build-backend = “setuptools.build_meta”
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "plotlyshare"
 version = "1.0.0"
-author = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
+authors = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
 description = "Link-based sharing of `plotly` plots with a private web app"
-long_description = "README.md"
+readme = "README.md"
 requires-python = ">=3.7"
-url = GITHUB REPOSITORY LINK
-classifiers =
-[
+classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
@@ -24,4 +22,5 @@ dependencies = [
 keywords = ["plotly", "interactive", "plot"]
 
 [project.urls]
-Homepage = ""
+Homepage = "https://github.com/plutonium-239/plotlyshare"
+Issues = "https://github.com/plutonium-239/plotlyshare/issues"

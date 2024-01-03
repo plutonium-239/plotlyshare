@@ -21,7 +21,7 @@ if force_setup or not config['setup_done']:
 	Please make an account on deta space: https://deta.space
 
 	Then, install the app 'PlotlyShare' on your personal space from this link:
-	https://deta.space/discovery/
+	https://deta.space/discovery/@pu239/plotlyshare
 
 	Once you have done that, open the newly installed app from your horizon (home screen in deta space) by 
 	just typing 'PlotlyShare' or double clicking the icon. This will open the app in a new tab.
