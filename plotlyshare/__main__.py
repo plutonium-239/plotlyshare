@@ -1,4 +1,4 @@
-import sys, json
+import os, sys, json
 
 allowed_commands = ['setup']
 assert len(sys.argv) == 2, f'Please give only one argument out of {allowed_commands}'
@@ -7,8 +7,11 @@ assert command in allowed_commands, f'Given command not in {allowed_commands}'
 
 config_file_path = 'plotlyshare/config.json'
 
-with open(config_file_path) as f:
-	old_config = json.load(f)
+if os.path.exists(config_file_path):
+	with open(config_file_path) as f:
+		old_config = json.load(f)
+else:
+	config = {'setup_done': False}
 
 if command == 'setup':
 	if old_config['setup_done']:

@@ -1,7 +1,7 @@
 from plotlyshare.custom_plotly_renderer import PlotlyShareRenderer, test_connection
 import json
 from rich import console
-import sys, time
+import os, sys, time
 
 config_file_path = 'plotlyshare/config.json'
 
@@ -9,8 +9,11 @@ force_setup = False
 if len(sys.argv) == 2 and sys.argv[1] == 'force_setup':
 	force_setup = True
 
-with open(config_file_path) as f:
-	config = json.load(f)
+if os.path.exists(config_file_path):
+	with open(config_file_path) as f:
+		config = json.load(f)
+else:
+	config = {'setup_done': False}
 
 if force_setup or not config['setup_done']:
 	c = console.Console()
