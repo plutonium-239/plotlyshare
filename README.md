@@ -17,7 +17,7 @@ import plotlyshare
 ...
 fig = px.line(...)
 fig = go.Figure(...)
-fig.show(renderers=['plotlyshare'])
+fig.show(renderer='plotlyshare')
 ```
 
 and that's it, the package will upload your plot to your instance of plotlyshare running in deta space and assign it a randomly generated name (which can be edited from the app's page) 

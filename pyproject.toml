@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plotlyshare"
-version = "1.0.2"
+version = "1.0.7"
 authors = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
 description = "Link-based sharing of `plotly` plots with a private web app"
 readme = "README.md"
@@ -17,7 +17,8 @@ classifiers = [
 dependencies = [
 	"rich",
 	"plotly",
-	"wonderwords"
+	"wonderwords",
+	"requests"
 ]
 keywords = ["plotly", "interactive", "plot"]
 
