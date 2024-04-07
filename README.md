@@ -1,4 +1,5 @@
 # `plotlyshare`
+[![Downloads](https://static.pepy.tech/badge/plotlyshare)](https://pepy.tech/project/plotlyshare)
 
 The purpose of this package is to provide a seamless way to share interactive `plotly` plots, providing a similar experience to google docs/etc. 
 
