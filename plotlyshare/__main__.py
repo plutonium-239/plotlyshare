@@ -3,7 +3,7 @@ import time
 from rich import console, pretty
 from plotlyshare.custom_plotly_renderer import test_connection
 
-allowed_commands = ['setup']
+allowed_commands = ['setup', 'test']
 assert len(sys.argv) == 2, f'Please give only one argument out of {allowed_commands}'
 command = sys.argv[1]
 assert command in allowed_commands, f'Given command not in {allowed_commands}'
@@ -66,3 +66,14 @@ if command == 'setup':
 			c.print('[bold green]Setup completed!🚀[/bold green]')
 		else:
 			c.print('[bold red]Setup failed:[/bold red]\n'+display)
+elif command == 'test':
+	if old_config['setup_done']:
+		c = console.Console()
+		with c.status('Testing credentials...', spinner='shark'):
+			passed, display = test_connection(old_config['DETA_APP_URL'], old_config['DETA_PROJECT_KEY'])
+
+			if passed:
+				old_config['setup_done'] = True
+				c.print('[bold green]It works!🚀[/bold green]')
+			else:
+				c.print('[bold red]There was an error:[/bold red]\n'+display)

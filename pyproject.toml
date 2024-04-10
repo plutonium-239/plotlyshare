@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+build-backend = "flit_core.buildapi"
+requires = ["flit_core >=3.2,<4"]
 
 [project]
 name = "plotlyshare"
-version = "1.0.7"
+version = "1.0.8"
 authors = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
 description = "Link-based sharing of `plotly` plots with a private web app"
 readme = "README.md"
