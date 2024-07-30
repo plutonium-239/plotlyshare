@@ -46,7 +46,10 @@ if command == 'setup':
 	''')
 	time.sleep(0.5)
 	config['DETA_APP_URL'] = c.input('[bold #FF84AC] DETA_APP_URL: [/bold #FF84AC]')
-	config['DETA_PROJECT_KEY'] = c.input('[bold #FF84AC] DETA_PROJECT_KEY: [/bold #FF84AC]')
+	base_url = c.input('[bold #FF84AC] DETA_PROJECT_KEY: [/bold #FF84AC]')
+	if base_url.endswith('/'):
+		base_url = base_url.rstrip('/')
+	config['DETA_PROJECT_KEY'] = base_url
 	pref_open_browser = c.input(r'[italic #FF84AC] Would you like to open the plot in a browser after plotting? (default: yes) (\[y]/n) [/italic #FF84AC]')
 	print(pref_open_browser)
 	if pref_open_browser.lower() in ['n', 'no']:

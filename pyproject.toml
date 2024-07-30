@@ -4,7 +4,7 @@ requires = ["flit_core >=3.2,<4"]
 
 [project]
 name = "plotlyshare"
-version = "1.0.8"
+version = "1.0.9"
 authors = [{name="plutonium239", email="plutonium.239.811@gmail.com"}]
 description = "Link-based sharing of `plotly` plots with a private web app"
 readme = "README.md"
@@ -25,3 +25,6 @@ keywords = ["plotly", "interactive", "plot"]
 [project.urls]
 Homepage = "https://github.com/plutonium-239/plotlyshare"
 Issues = "https://github.com/plutonium-239/plotlyshare/issues"
+
+[tool.flit.sdist]
+exclude = ["*/config.json"]
