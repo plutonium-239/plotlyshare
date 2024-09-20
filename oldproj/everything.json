@@ -1,0 +1,18 @@
+[
+{"key":"118c1e36908a1d22fd3485b2764f1f92","name":"gpt2 predict_T=10 individual_slope_6393 0","num_chunks":4},
+{"key":"143ba66e4edb73466e059b4bf84425ac","name":"gpt2 predict_T=1 clever_turkey_7792 1","num_chunks":4},
+{"key":"199d00f2edaa63a701d26de36da2c3ce","name":"gpt2 predict_T=5 ill_guppy_748 0","num_chunks":4},
+{"key":"2b26f080a7f2b26b0ca5c65d8f551911","name":"mamba predict_T=1 evolutionary_bracket_7225 2","num_chunks":4},
+{"key":"3be41b2048202b779ca079d15e209156","name":"mamba predict_T=1 evolutionary_bracket_7225 1","num_chunks":4},
+{"key":"5513240df31e2338910ca9848071cbc1","name":"gpt2 predict_T=1 clever_turkey_7792 0","num_chunks":4},
+{"key":"69558d6b84640194fd186ff9fb411ea0","name":"gpt2 predict_T=10 individual_slope_6393 3","num_chunks":4},
+{"key":"702a0bd44b0088211c340fede8a6dff9","name":"gpt2 predict_T=1 clever_turkey_7792 3","num_chunks":4},
+{"key":"770069738020858cd94b178282806653","name":"mamba predict_T=1 evolutionary_bracket_7225 3","num_chunks":4},
+{"key":"8ea0ebc6b04a1a7e3727360ee13df288","name":"gpt2 predict_T=5 ill_guppy_748 2","num_chunks":4},
+{"key":"a9d8c8c741d029af2a1119335f74fec5","name":"gpt2 predict_T=5 ill_guppy_748 3","num_chunks":4},
+{"key":"aa9f30f2e077056d8b4ef49100620c10","name":"gpt2 predict_T=10 individual_slope_6393 2","num_chunks":4},
+{"key":"c0952864647f86bc31cd5f66ec1e9258","name":"gpt2 predict_T=1 clever_turkey_7792 2","num_chunks":4},
+{"key":"c190bf7d2100209ed553cbaa836d4ca2","name":"mamba predict_T=1 evolutionary_bracket_7225 0","num_chunks":4},
+{"key":"d4377250262a21778664c69188574986","name":"gpt2 predict_T=5 ill_guppy_748 1","num_chunks":4},
+{"key":"d49cc2ad92fb84d3210125fae9ff11da","name":"gpt2 predict_T=10 individual_slope_6393 1","num_chunks":4}
+]
