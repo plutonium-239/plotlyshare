@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="/public/plotonly.css"/>
+    <link rel="stylesheet" href="/plotonly.css"/>
     <script fetchpriority="high" charset="utf-8" src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
 </svelte:head>
 <div class="w-full h-[calc(100%-4em)] skeleton" id="plotContainer" bind:this={plotContainer}></div>

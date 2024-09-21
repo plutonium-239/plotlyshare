@@ -33,7 +33,7 @@
     <section class="content md:h-screen">
         <header id="header" class="sticky top-0 bg-base-100 max-h-24 transition-all duration-150 text-xl md:text-2xl">
             <div id="header_logo" class="inline-flex gap-4 items-center max-h-[inherit]">
-                <img class="justify-self-start max-h-[inherit]" src="/public/icons/icon-nobg.svg" alt="logo">
+                <img class="justify-self-start max-h-[inherit]" src="/icons/icon-nobg.svg" alt="logo">
                 <h3 class="max-md:hidden w-fit h-fit text-primary">plotlyshare</h3>
             </div>
         	<h1 class="text-center text-accent xl:absolute xl:left-1/2 xl:-translate-x-1/2">{ title }</h1>

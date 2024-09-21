@@ -22,7 +22,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="/public/dashonly.css"/>
+    <link rel="stylesheet" href="/dashonly.css"/>
 </svelte:head>
 <div class="md:px-24 xl:px-36 py-8 max-md:px-4 md:flex justify-center min-w-[100vw] w-fit">
 <table class="table table-zebra table-xs md:table-lg sortable">
