@@ -1,5 +1,5 @@
 import { getAccessToken } from "web-auth-library/google";
-import type { Google } from "worker-auth-providers/dist/providers/google/types";
+import type { Google } from "../worker-auth-providers/dist/providers/google/types";
 import jwt from '@tsndr/cloudflare-worker-jwt';
 
 export interface Env {

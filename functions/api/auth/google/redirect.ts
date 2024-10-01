@@ -1,4 +1,4 @@
-import { google } from "worker-auth-providers";
+import { google } from "../../../worker-auth-providers";
 import type { Env } from "../../utils";
 
 

@@ -6,8 +6,8 @@ compatibility_date = "2024-09-20"
 [env]
 production = { }
 
-[alias]
-"worker-auth-providers" = "./functions/worker-auth-providers"
+# [alias]
+# "worker-auth-providers" = "./functions/worker-auth-providers"
 
 [vars]
 GOOGLE_REDIRECT_PROD_URL = "https://plotlyshare.pages.dev/api/auth/google/callback"

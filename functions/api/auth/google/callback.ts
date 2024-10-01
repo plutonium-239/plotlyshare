@@ -1,6 +1,6 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
-import { google, type OAuthTokens } from "worker-auth-providers";
-import type { Google } from 'worker-auth-providers/dist/providers/google';
+import { google, type OAuthTokens } from "../../../worker-auth-providers";
+import type { Google } from '../../../worker-auth-providers/dist/providers/google';
 import { createFirestoreDocument, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
 import { onRequestGet as redirectRequest } from './redirect';
 
