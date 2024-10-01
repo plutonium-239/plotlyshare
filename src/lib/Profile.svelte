@@ -65,9 +65,10 @@
                 }
             }
         }
-
+        
         worker.postMessage(zipFile)        
     }
+    $: uid_token = `${$profile.uid}//${$profile.cli_token}`
 
     async function regenerateCLIToken() {
         if (!tokenRegenerated) {
@@ -116,12 +117,12 @@
                         {@html EyeVisibleIcon}
                     </div>
                 </label>
-                <div class:hidden={!cliTokenShown}>
-                    {$profile.uid}//{$profile.cli_token}
+                <div class:hidden={!cliTokenShown} class="px-4 break-all">
+                    {uid_token}
                 </div>
                 <button 
                     class="z-10 btn btn-outline btn-accent p-0.5 min-h-0 w-10 h-10 clicked-success" 
-                    on:click={() => navigator.clipboard.writeText($profile.cli_token)}
+                    on:click={() => navigator.clipboard.writeText(uid_token)}
                 >
                     {@html CopyIcon}
                 </button>

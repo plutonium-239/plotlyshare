@@ -1,9 +1,10 @@
+import queryString from "query-string";
 import { verifyAndDecodeJWT, type Env } from "../utils";
 
 export const onRequest: PagesFunction<Env> = async (context) => {
 
     const authorization = context.request.headers.get('Authorization');
-    const uid = context.request.headers.get('px.sh-user');
+    const uid = queryString.parseUrl(context.request.url).query.user as string|null
     const token = authorization?.split('Bearer ')[1];
     console.log("cli ping", uid, authorization);
     if (authorization && token && uid) {
