@@ -1,11 +1,11 @@
-import { verifyAndDecodeJWT, type Env } from "./utils";
+import { verifyCLIToken, type Env } from "./utils";
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
 
-    const decryptedjwt = await verifyAndDecodeJWT(context.request, context.env.ENCODE_JWT_TOKEN)
-    if (decryptedjwt instanceof Response) return decryptedjwt;
-    
     const request : Request = context.request
+    const res = await verifyCLIToken(request, context.env)
+    if (res instanceof Response) return res
+    
     const data = request.formData
     console.log("received data:", context.data);
     console.log("received form data:", data);

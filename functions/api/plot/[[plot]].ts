@@ -1,6 +1,5 @@
 import queryString from "query-string";
 import { makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, type Env, type PlotData, type UserData } from "../utils";
-import type { PlotlyDataLayoutConfig } from "plotly.js-dist-min";
 
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -26,7 +25,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     
     if (data.public) {
         const plotjson = await fetch(data.linked_file).then(res => res.text())
-        //.then(res => res.json()) as PlotlyDataLayoutConfig
         // TODO: add google drive fetching
         return new Response(
             plotjson,

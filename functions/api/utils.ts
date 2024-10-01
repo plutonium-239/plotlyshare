@@ -1,6 +1,7 @@
 import { getAccessToken } from "web-auth-library/google";
 import type { Google } from "../worker-auth-providers/dist/providers/google/types";
 import jwt from '@tsndr/cloudflare-worker-jwt';
+import queryString from "query-string";
 
 export interface Env {
     GOOGLE_CLIENT_ID: string,
@@ -76,6 +77,19 @@ export async function verifyAndDecodeJWT(request: Request, secret: string) {
     }
     // @ts-expect-error
     return jwt.decode(signedjwt).payload! as DecryptedJWT
+}
+
+export async function verifyCLIToken(request: Request, env: Env) {
+    const authorization = request.headers.get('Authorization');
+    const uid = queryString.parseUrl(request.url).query.user as string|null
+    const token = authorization?.split('Bearer ')[1];
+    console.log("cli ping", uid, authorization);
+    if (authorization && token && uid) {
+        if (token === await env.cli_tokensKV.get(uid)) {
+            return uid
+        }
+    }
+    return new Response('Unauthorized', { status: 401 });
 }
 
 const encoder = new TextEncoder()
