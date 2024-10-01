@@ -11,6 +11,9 @@ export const onRequestGet : PagesFunction<Env> = async (context) => {
             state = crypto.randomUUID()
             await context.env.basicprofileKV.put('__state', state, {expirationTtl: 3600})
         }
+        console.log("context.env is");
+        console.log(context.env);
+        
 
         const location = await google.redirect({
             options: {
