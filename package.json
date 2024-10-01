@@ -26,12 +26,15 @@
     "vite": "^5.3.4"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.658.1",
     "@tsndr/cloudflare-worker-jwt": "^2.5.4",
     "dom-parser": "^1.1.5",
     "fflate": "^0.8.2",
     "firebase": "^10.13.2",
     "itty-router": "^5.0.18",
+    "jose": "^5.9.3",
     "plotly.js-dist-min": "^2.35.2",
+    "query-string": "^9.1.0",
     "svelte-persisted-store": "^0.11.0",
     "svelte-spa-router": "^4.0.1",
     "web-auth-library": "^1.0.3"
