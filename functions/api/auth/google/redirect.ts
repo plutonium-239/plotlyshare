@@ -5,7 +5,7 @@ import type { Env } from "../../utils";
 export const onRequestGet : PagesFunction<Env> = async (context) => {
     console.log("RECEIVED REDIRECT REQUEST");
     
-    try {
+    // try {
         let state = await context.env.basicprofileKV.get('__state')
         if (!state) {
             state = crypto.randomUUID()
@@ -37,16 +37,16 @@ export const onRequestGet : PagesFunction<Env> = async (context) => {
                 },
             }
         ) 
-    } catch (e: any) {
-        return new Response(
-            JSON.stringify({
-                error: 'Invalid request',
-                message: `${e.message}`
-            }),
-            {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-            }
-        )
-    }
+    // } catch (e: any) {
+    //     return new Response(
+    //         JSON.stringify({
+    //             error: 'Invalid request',
+    //             message: `${e.message}`
+    //         }),
+    //         {
+    //             status: 400,
+    //             headers: { 'Content-Type': 'application/json' },
+    //         }
+    //     )
+    // }
 }
