@@ -26,6 +26,7 @@
     "vite": "^5.3.4"
   },
   "dependencies": {
+    "@tsndr/cloudflare-worker-jwt": "^2.5.4",
     "dom-parser": "^1.1.5",
     "fflate": "^0.8.2",
     "firebase": "^10.13.2",

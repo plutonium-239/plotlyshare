@@ -1,4 +1,4 @@
-import { makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, type Env, type UserData } from "./utils";
+import { verifyAndDecodeJWT, type Env } from "./utils";
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
 

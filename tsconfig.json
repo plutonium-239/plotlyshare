@@ -15,7 +15,11 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "worker-auth-providers": ["./worker-auth-providers"],
+      "worker-auth-providers/*": ["./worker-auth-providers/*"]
+    }
     // "moduleDetection": "force"
   },
   "include": [
