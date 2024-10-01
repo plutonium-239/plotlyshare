@@ -15,7 +15,7 @@ function generateJWT(user: Google.CallbackResponse, env: Env) {
 }
 
 
-async function createUser(user: Google.CallbackResponse, env : Env) {
+async function createUser(user: Google.CallbackResponse, env : Env, context: EventContext<Env, any, Record<string, unknown>>) {
     // const existing = await makeAPIfetch(makeRESTdocURL(env, 'users', `${user.user.id}`), env)
     const rid = await hashThis(user.user.id)
     const existing = await env.basicprofileKV.get(rid)
@@ -61,7 +61,7 @@ async function createUser(user: Google.CallbackResponse, env : Env) {
     const promiseRTKV = env.basicprofileKV.put(rid, JSON.stringify(basicProfileForKV))
     const promiseFIRE = makeAPIfetch(
         makeRESTdocURL(env, `users?documentId=${user.user.id}`),
-        env,
+        context,
         {
             method: 'POST',
             body: JSON.stringify(createFirestoreDocument(profile))
@@ -131,7 +131,7 @@ export const onRequest : PagesFunction<Env> = async (context) => {
             console.info('no user.token found; explicitly set user.token to token');
         }
 
-        await createUser(user, context.env);
+        await createUser(user, context.env, context);
 
         const jwt = await generateJWT(user, context.env);
         console.log("[jwt]", jwt);

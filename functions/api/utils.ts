@@ -129,11 +129,12 @@ function convertFirestoreArray(array: { values: FirestoreField[] }): any[] {
 
 
 let accessToken: string
-export async function makeAPIfetch(url: string, env: Env, extraHeaders?: RequestInit<CfProperties<unknown>>) {
+export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Record<string, unknown>>, extraHeaders?: RequestInit<CfProperties<unknown>>) {
     if (!accessToken) {
         accessToken = await getAccessToken({
-            credentials: env.GOOGLE_CLOUD_CREDENTIALS,
+            credentials: ctx.env.GOOGLE_CLOUD_CREDENTIALS,
             scope: "https://www.googleapis.com/auth/datastore",
+            waitUntil: ctx.waitUntil.bind(ctx),
         });
     }
     // @ts-expect-error
