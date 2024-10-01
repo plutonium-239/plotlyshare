@@ -1,4 +1,4 @@
-import * as queryString from "query-string";
+import queryString from "query-string";
 import { ConfigError } from "../../utils/errors";
 export default async function redirect({ options, }) {
 const { clientId, redirectUrl, // Deprecated, use redirectTo instead

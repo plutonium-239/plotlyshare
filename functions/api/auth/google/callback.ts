@@ -96,9 +96,13 @@ export const onRequest : PagesFunction<Env> = async (context) => {
             return new Response("Could not find state, please start again", {status: 502})
         }
         
-        const params = new URLSearchParams(context.request.url)
+        const params = new URLSearchParams(context.request.url.split('?').pop())
+        // console.log(context.request.url);
+        // console.log(params);
+        
         let token : OAuthTokens | undefined
         if (params.get('state') !== existingState) {
+            console.error(`state found: ${params.get('state')} should have been: ${existingState}`);   
             return new Response("Bad state parameter", {status: 400})
         }
         if (params.get('error')) {

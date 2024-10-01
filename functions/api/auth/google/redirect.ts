@@ -1,7 +1,6 @@
 import { google } from "../../../worker-auth-providers";
 import type { Env } from "../../utils";
 
-
 export const onRequestGet : PagesFunction<Env> = async (context) => {
     console.log("RECEIVED REDIRECT REQUEST");
     
@@ -11,9 +10,7 @@ export const onRequestGet : PagesFunction<Env> = async (context) => {
             state = crypto.randomUUID()
             await context.env.basicprofileKV.put('__state', state, {expirationTtl: 3600})
         }
-        console.log("context.env is");
-        console.log(context.env);
-        
+        // console.log("state is", state);
 
         const location = await google.redirect({
             options: {
