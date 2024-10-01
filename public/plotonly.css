@@ -1,8 +1,4 @@
-:root {
+:root, #header.scrolled {
     --header-padding-x: 3em;
 }
-#header::after {
-    /* display: block;
-    content: ''; */
-    /* @apply lg:absolute lg:left-1/2; */
-}
+
