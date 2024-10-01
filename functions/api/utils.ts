@@ -33,22 +33,26 @@ export interface ProfileInFirestore extends Google.UserResponse {
     grantedScopes: string,
 }
 
+export type PlotData = {
+    public: boolean
+    name: string
+    time_created: string
+    timestamp: number
+    linked_file: URL
+}
+
+export type CollectionData = {
+    public: boolean,
+    name: string,
+    members: string[] // can be either plot or collection id
+}
+
 export type UserData = {
     collections: {
-        [collectionID: string]: {
-            public: boolean,
-            name: string,
-            members: string[] // can be either plot or collection id
-        }
+        [collectionID: string]: CollectionData
     }
     plots: {
-        [plotID: string]: {
-            public: boolean
-            name: string
-            time_created: string
-            timestamp: number
-            linked_file: URL
-        }
+        [plotID: string]: PlotData
     }
 }
 

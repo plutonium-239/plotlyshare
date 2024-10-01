@@ -14,7 +14,7 @@
         '/': Dashboard,
 
         // Using named parameters, with last being optional
-        '/plot/:id': Plot,
+        '/plot/:uid/:plotid': Plot,
 
         // Catch-all
         // This is optional, but if present it must be the last

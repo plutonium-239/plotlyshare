@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { forceDarkPlots, loggedIn, type ProfileData } from './data';
+    import { forceDarkPlots, loggedIn, profile, type ProfileAPIResponse, type ProfileData } from './data';
     import ProfileIcon from './icons/profile-default.svg?raw'
     import ChevronRightIcon from './icons/chevron-right.svg?raw'
     import MoonIcon from './icons/moon.svg?raw'
@@ -10,8 +10,7 @@
     import migrationWorker from './migrationWorker?worker'
     let profile_modal: HTMLDialogElement;
 
-    type ProfileAPIResponse = {name: string, picture: string, cli_token: string}
-    let profile: ProfileAPIResponse
+    // let profile: ProfileAPIResponse
     let migrateCollapseOpen = false
     let migrateFileChosen: FileList
     let migrateOutput = ""
@@ -22,12 +21,13 @@
     
     // let it be async, dont await
     let profilePromise = fetch('/api/auth/profile').then((res) => res.json()).then((data) => {
-        profile = data as ProfileAPIResponse;
+        $profile = data as ProfileAPIResponse;
         $loggedIn = true;
         console.log("LOGGED IN");
-        console.log(profile);
+        console.log($profile);
     }).catch(() => {
         $loggedIn = false;
+        $profile = {uid: 'demo_plots'} as ProfileAPIResponse
         console.log("NOT LOGGED IN");
     });
 
@@ -76,7 +76,7 @@
             await fetch('/api/auth/regen_cli_token')
             .then(res => res.json())
             .then(res => {
-                profile.cli_token = (res as {cli_token:string}).cli_token
+                $profile.cli_token = (res as {cli_token:string}).cli_token
             })
         }
     }
@@ -94,10 +94,10 @@
         {#await profilePromise then }
         {#if $loggedIn}
         <div class="w-48 h-48 m-5 relative flex items-center justify-center">
-            <img class="z-10 absolute top-0 left-0 w-full blur-lg rounded-full" src={profile.picture} aria-hidden="true" alt="blur backdrop" />
-            <img class="z-20 rounded-full shadow-[black] shadow-lg" src={profile.picture} alt="profile"/>
+            <img class="z-10 absolute top-0 left-0 w-full blur-lg rounded-full" src={$profile.picture} aria-hidden="true" alt="blur backdrop" />
+            <img class="z-20 rounded-full shadow-[black] shadow-lg" src={$profile.picture} alt="profile"/>
         </div>
-        <h3 class="text-lg font-bold">Hello {profile.name}!</h3>
+        <h3 class="text-lg font-bold">Hello {$profile.name}!</h3>
         <a class="btn btn-error btn-outline mt-4" href="/api/auth/logout">Log Out</a>
 
         <div class="divider text-primary">CLI Token</div>
@@ -117,11 +117,11 @@
                     </div>
                 </label>
                 <div class:hidden={!cliTokenShown}>
-                    {profile.cli_token}
+                    {$profile.uid}//{$profile.cli_token}
                 </div>
                 <button 
                     class="z-10 btn btn-outline btn-accent p-0.5 min-h-0 w-10 h-10 clicked-success" 
-                    on:click={() => navigator.clipboard.writeText(profile.cli_token)}
+                    on:click={() => navigator.clipboard.writeText($profile.cli_token)}
                 >
                     {@html CopyIcon}
                 </button>

@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { data, dates, type PlotMetadata } from "../data";
+    import { data, dates, profile, type PlotMetadata } from "../data";
     import DeleteIcon from '../icons/delete.svg?raw'
 
 
 </script>
 
 <div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch">
-    {#if $data.size > 0}
+    {#if $data.size > 0  && dates.size > 0}
     {#each $data.entries() as [key, item] (key) }
         <div class="card bg-base-200 m-4 aspect-video shadow-lg hover:bg-secondary/25 transition-colors duration-150">
             <!-- svelte-ignore a11y-missing-content -->
-            <a class="absolute w-full h-full" href="#/plot/{key}"></a>
+            <a class="absolute w-full h-full" href="#/plot/{$profile.uid}/{key}"></a>
             <div class="card-body">
                 <span class="card-title z-[5]">{item.name}</span>
                 

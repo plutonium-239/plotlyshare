@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { data, dates, type PlotMetadata } from '../data';
+    import { data, dates, profile, type PlotMetadata } from '../data';
     import DeleteIcon from '../icons/delete.svg?raw'
     import LinkIcon from '../icons/link.svg?raw'
 
@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody class="">
-        {#if $data.size > 0}
+        {#if $data.size > 0 && dates.size > 0}
         {#each $data.entries() as [key, item] (key) }
             <tr>
                 <td>
@@ -32,7 +32,7 @@
                     </div>
                 </td>
                 <td class="text-center"> 
-                    <a class="btn btn-primary btn-square btn-sm custom-btn btn-pink" href="#/plot/{key}" role="button">
+                    <a class="btn btn-primary btn-square btn-sm custom-btn btn-pink" href="#/plot/{$profile.uid}/{key}" role="button">
                         {@html LinkIcon}
                     </a> 
                 </td>

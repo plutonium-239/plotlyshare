@@ -35,6 +35,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     
     return new Response(
         JSON.stringify({
+            uid: uid,
             name: userParsed.given_name,
             picture: userParsed.picture,
             cli_token: cli_token

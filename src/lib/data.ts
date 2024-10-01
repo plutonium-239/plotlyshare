@@ -44,5 +44,20 @@ export async function getDemoMetadata(): Promise<Map<string, PlotMetadata>> {
     return new Map(sortedMeta);
 }
 
-export let data = persisted('cachedData', new Map() as Map<string, PlotMetadata>)
+const mapSerializer = {
+    parse: (data: string) => {
+        return new Map(JSON.parse(data));
+    },
+    stringify: (data: Map<string, any>) => {
+        return JSON.stringify([...data]);
+    }
+}
+
+export let data = persisted('cachedData', new Map() as Map<string, PlotMetadata>, {serializer: mapSerializer})
 export let dates : Map<string, {long_time: string, short_time: string}> = new Map()
+
+export type ProfileAPIResponse = {name: string, picture: string, cli_token: string, uid: string}
+
+export let profile = persisted('cachedProfile', {uid: 'demo_plots'} as ProfileAPIResponse)
+
+// export let demoData = persisted('demoData', await getDemoMetadata())

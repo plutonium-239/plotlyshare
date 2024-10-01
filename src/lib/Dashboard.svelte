@@ -14,28 +14,35 @@
     // const local_format = Intl.DateTimeFormat();
     
     onMount(async () => {
+        // let data: Map<string, PlotMetadata>
         if (!$loggedIn) {
-            $data = await getDemoMetadata()
-            
+            // console.log($data);
+            if ($data.size === 0) $data = await getDemoMetadata()
             console.log($data);
             
         } else {
             let res: UserData = await fetch('/api/plots').then(res => res.json())
             console.log('res')
             console.log(res);
-            if (res.plots) {
+            if (res.plots && (Object.keys(res.plots).length !== $data.size)) {
                 $data = new Map(Object.entries(res.plots))
                 console.log('$data');
                 console.log($data);
-            } else {
-                $data = await getDemoMetadata()
             } 
+            // TODO: add collection object
+            // if logged in user does not have any plots
+            else {
+                $data = new Map()
+            //     $data = await getDemoMetadata()
+            }
         }
         $data.forEach((value, key) => {
             const d = new Date(value.time_created);
             // key.time_created = local_format.format(d);
             dates.set(key, {long_time: d.toLocaleString(), short_time: short_format.format(d)});
         });
+        console.log(dates);
+        
 
     })
 
