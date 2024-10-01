@@ -17,8 +17,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "paths": {
-      "worker-auth-providers": ["./worker-auth-providers"],
-      "worker-auth-providers/*": ["./worker-auth-providers/*"]
+      "worker-auth-providers": ["./functions/worker-auth-providers"],
+      "worker-auth-providers/*": ["./functions/worker-auth-providers/*"]
     }
     // "moduleDetection": "force"
   },
