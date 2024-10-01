@@ -1,6 +1,7 @@
 import type { PlotlyDataLayoutConfig } from 'plotly.js-dist-min';
 import { persisted } from 'svelte-persisted-store';
 import { writable, type Writable } from 'svelte/store';
+import type { CollectionData, PlotData } from '../../functions/api/utils';
 
 export const loggedIn = persisted('loggedIn', false)
 
@@ -9,15 +10,9 @@ export const dashboardView = persisted('dashboardView', 'list' as DashboardView)
 
 export const forceDarkPlots = persisted('forceDarkPlots', false)
 
-export type PlotData = PlotlyDataLayoutConfig
+export type PlotFullData = PlotlyDataLayoutConfig
 
-export type PlotMetadata = { 
-    public: boolean,
-    name: string, 
-    time_created: string, 
-    timestamp: number, 
-    linked_file: URL
-}
+export type PlotMetadata = PlotData
 
 export type ProfileData = {
     email: string
@@ -54,6 +49,7 @@ const mapSerializer = {
 }
 
 export let data = persisted('cachedData', new Map() as Map<string, PlotMetadata>, {serializer: mapSerializer})
+export let collections = persisted('cachedCollections', new Map() as Map<string, CollectionData>, {serializer: mapSerializer})
 export let dates : Map<string, {long_time: string, short_time: string}> = new Map()
 
 export type ProfileAPIResponse = {name: string, picture: string, cli_token: string, uid: string}

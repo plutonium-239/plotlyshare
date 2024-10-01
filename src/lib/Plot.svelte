@@ -1,16 +1,15 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { data, forceDarkPlots, loggedIn, type PlotData } from './data';
+    import { data, forceDarkPlots, loggedIn, type PlotFullData } from './data';
     // import Plotly from 'plotly.js-dist-min'
     import type { Writable } from 'svelte/store';
-    import type { PlotlyDataLayoutConfig } from 'plotly.js-dist-min';
     export let params: any;
     
     let plotContainer: HTMLDivElement
     let plotID = params.plotid
     let userID = params.uid
     let plotLoaded: boolean = false
-    let plotjson: PlotData | undefined
+    let plotjson: PlotFullData | undefined
     let plotlyDarkTemplate: any
     let loadingProgress: string = "Initializing Plotly.js 🧐"
     let plotlyNormalTemplateFromPlot: any
@@ -69,7 +68,7 @@
                 console.error("error fetching plot plotjson");
                 console.log(e);
                 // return Error("error fetching plot plotjson")
-            }) as PlotlyDataLayoutConfig
+            }) as PlotFullData
         if (plotjson) {
             await Plotly.newPlot(
                 plotContainer, 

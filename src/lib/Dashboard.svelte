@@ -2,7 +2,7 @@
   import Table from './dashboard/Table.svelte';
 
     import type { UserData } from '../../functions/api/utils';
-    import { dashboardView, data, dates, getDemoMetadata, loggedIn, type PlotMetadata } from './data';
+    import { collections, dashboardView, data, dates, getDemoMetadata, loggedIn, type PlotMetadata } from './data';
     import { onMount } from 'svelte';
     import Grid from './dashboard/Grid.svelte';
     import GridIcon from './icons/grid.svg?raw';
@@ -28,12 +28,15 @@
                 $data = new Map(Object.entries(res.plots))
                 console.log('$data');
                 console.log($data);
-            } 
-            // TODO: add collection object
-            // if logged in user does not have any plots
-            else {
+            } else {
+                // if logged in user does not have any plots
                 $data = new Map()
             //     $data = await getDemoMetadata()
+            }
+            if (res.collections && (Object.keys(res.plots).length !== $data.size)) {
+                $collections = new Map(Object.entries(res.collections))
+                console.log('$collections');
+                console.log($collections);
             }
         }
         $data.forEach((value, key) => {

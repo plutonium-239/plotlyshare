@@ -15,16 +15,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (res instanceof Response) return res
     
     const data = await request.formData()
-    // console.log("received data:", JSON.stringify(context.data));
-    console.log("received form data:", data);
-    console.log("received form data:", JSON.stringify(data));
+    
+    // for (const [key, value] of data.entries()) {
+    //     console.log(`${key}: ${value}`);
+    // }
 
-    for (const [key, value] of data.entries()) {
-        console.log(`${key}: ${value}`);
-    }
+    const plot = Object.fromEntries(data.entries())
 
     
-    // console.log("received plot keys:", data as PlotFormData);
+    console.log("parsed plot:");
+    console.log(plot);
+    // TODO: figure out storing the plot on drive
 
     // const userData: SingleUserData = await makeAPIfetch(
     //     makeRESTdocURL(context.env, "userdata", decryptedjwt.user_id), 
