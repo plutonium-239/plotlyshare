@@ -76,7 +76,7 @@
             await fetch('/api/auth/regen_cli_token')
             .then(res => res.json())
             .then(res => {
-                profile.cli_token = res.cli_token
+                profile.cli_token = (res as {cli_token:string}).cli_token
             })
         }
     }
@@ -144,6 +144,41 @@
         <div class="w-48 h-fit btn btn-accent btn-circle">{@html ProfileIcon}</div>
         <a class="btn btn-primary mt-4" href="/api/auth/google/redirect">Log In</a>
         
+        <!-- <div class="divider text-primary">CLI Token</div>
+        <div class="join join-vertical w-full">
+            <div class="text-base join-item bg-base-200 rounded-xl p-2 text-center w-full flex justify-between items-center relative">
+                <input 
+                    type="checkbox" bind:checked={cliTokenShown}
+                    class="absolute w-full h-full left-0 top-0 opacity-0 cursor-pointer" 
+                />
+                <label class="swap z-10">
+                    <input type="checkbox" bind:checked={cliTokenShown}/>
+                    <div class="swap-off h-10 w-10">
+                        {@html EyeHiddenIcon}
+                    </div>
+                    <div class="swap-on h-10 w-10">
+                        {@html EyeVisibleIcon}
+                    </div>
+                </label>
+                <div class:hidden={!cliTokenShown}>
+                    {"0312f5af-33cf-428c-b2b1-11aa6fc739f6"}
+                </div>
+                <button 
+                    class="z-10 btn btn-outline btn-accent p-0.5 min-h-0 w-10 h-10 clicked-success" 
+                    on:click={() => navigator.clipboard.writeText("0312f5af-33cf-428c-b2b1-11aa6fc739f6")}
+                >
+                    {@html CopyIcon}
+                </button>
+            </div>
+            <div class="collapse transition-opacity duration-150 {cliTokenShown? "collapse-open opacity-1":"opacity-0"} bg-primary join-item p-2 rounded w-full text-sm">
+                <div class="collapse-content text-info-content flex flex-col">
+                    <div>
+                        Run <code class="bg-base-300/25 rounded p-1">python -m plotlyshare</code> and paste this value there!
+                    </div>
+                    <button class="btn btn-error ml-auto" on:click={regenerateCLIToken}>Regenerate token</button>
+                </div>
+            </div>
+        </div> -->
         
         {/if}
         {/await}
