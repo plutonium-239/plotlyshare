@@ -1,7 +1,7 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import { google, type OAuthTokens } from "../../../worker-auth-providers";
 import type { Google } from '../../../worker-auth-providers/dist/providers/google';
-import { createFirestoreDocument, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
+import { createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
 import { onRequestGet as redirectRequest } from './redirect';
 
 
@@ -11,7 +11,7 @@ function generateJWT(user: Google.CallbackResponse, env: Env) {
     };
     const secret = env.ENCODE_JWT_TOKEN;
     console.log("[claims, secret]", claims, secret);
-    return jwt.sign({ exp: Math.floor(Date.now() / 1000) + 24 * 3600, ...claims}, secret, { algorithm: "HS256" });
+    return jwt.sign({ exp: Math.floor(Date.now() / 1000) + 7 * 24 * 3600, ...claims}, secret, { algorithm: "HS256" });
 }
 
 
@@ -43,6 +43,15 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
         return
     };
     console.log("Did not find user, making new : ", JSON.stringify(user));
+    const driveFolderId = await drivePutMeta(
+        {
+            name: 'PlotlyShare',
+            mimeType: 'application/vnd.google-apps.folder'
+        },
+        user.tokens.access_token,
+        {fields: 'id'}
+    ) as {id: string}
+    console.log("Made drive folder with id", driveFolderId);
     
 
 	const profile : ProfileInFirestore = {
@@ -56,7 +65,8 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
         given_name: profile.given_name,
         picture: profile.picture,
         refresh_token: user.tokens.refresh_token,
-        user_id: user.user.id
+        user_gid: user.user.id,
+        driveFolderId: driveFolderId.id,
     }
     const promiseRTKV = env.basicprofileKV.put(rid, JSON.stringify(basicProfileForKV))
     const promiseFIRE = makeAPIfetch(
@@ -67,6 +77,7 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
             body: JSON.stringify(createFirestoreDocument(profile))
         }
     )
+
     return Promise.all([promiseRTKV, promiseFIRE])
     // await setDoc(doc(metadata, 'userdata', rid), )
 }

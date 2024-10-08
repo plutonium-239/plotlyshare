@@ -1,15 +1,25 @@
 import { ConfigError, ProviderGetUserError, TokenError, } from "../../utils/errors";
 import { parseQuerystring } from "../../utils/helpers";
 import { logger } from "../../utils/logger";
-export async function getTokensFromCode(code, { redirectUrl, clientId, clientSecret }) {
+export async function getTokensFromCode(code, options) {
+    const { redirectUrl, clientId, clientSecret, grantType = "authorization_code" } = options
     logger.log(`[redirectUrl], ${redirectUrl}`, "info");
-    const params = {
+    let params = {
         client_id: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUrl,
         code,
-        grant_type: "authorization_code",
+        grant_type: grantType,
     };
+    if (grantType === 'refresh_token') {
+        params = {
+            client_id: clientId,
+            client_secret: clientSecret,
+            // redirect_uri: redirectUrl,
+            grant_type: grantType,
+            refresh_token: code
+        };
+    }
     const response = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: {

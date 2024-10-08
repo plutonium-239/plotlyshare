@@ -2,3 +2,9 @@
     --header-padding-x: 3em;
 }
 
+/* 642 = (16/9) * 360 <- min height of plot */
+@media (max-width: 642px) {
+    section.content:has(#plotContainer) {
+        width: fit-content;
+    }
+}

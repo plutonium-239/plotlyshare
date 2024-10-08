@@ -1,29 +1,69 @@
 <script lang="ts">
-    import { data, dates, profile, type PlotMetadata } from "../data";
-    import DeleteIcon from '../icons/delete.svg?raw'
+    import GridCard from "./GridCard.svelte";
+    import { data, collections, dates, plotsNotInCollections, type PlotMetadata } from "../data";
+    let sharingModal: HTMLDialogElement;
 
+    function notNull(x: any) {
+        return x!;
+    }
+
+    let plotInSharing: PlotMetadata;
+    function sharing(plotid: string) {
+        sharingModal.showModal();
+        plotInSharing = $data.get(plotid)!;
+    }
 
 </script>
 
-<div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch">
-    {#if $data.size > 0  && dates.size > 0}
-    {#each $data.entries() as [key, item] (key) }
-        <div class="card bg-base-200 m-4 aspect-video shadow-lg hover:bg-secondary/25 transition-colors duration-150">
-            <!-- svelte-ignore a11y-missing-content -->
-            <a class="absolute w-full h-full" href="#/plot/{$profile.uid}/{key}"></a>
-            <div class="card-body">
-                <span class="card-title z-[5]">{item.name}</span>
-                
-                <span class="col-hide-small">{ dates.get(key)?.long_time }</span>
-                <span class="block md:hidden">{ dates.get(key)?.short_time }</span>
-                
-                <div class="mt-auto card-actions self-end">
-                    <button type="button" class="z-[5] btn btn-outline btn-error btn-square btn-sm custom-btn" on:click={() => confirm('Are you sure?')}>
-                        {@html DeleteIcon}
-                    </button>
-                </div>
+{#if $data.size > 0 && dates.size > 0}
+{#each $collections as [key, coll]}
+    <div class="collapse">
+        <input type="checkbox" checked={true}/>
+        <div class="collapse-title">
+            <div class="divider divider-accent text-accent col-span-full">{coll.name}</div>
+        </div>
+        <div class="collapse-content">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch gap-4">
+            {#each coll.members as key (key)}
+                {@const item = notNull($data.get(key))}
+                <GridCard {item} {key} {sharing} />
+            {/each}
             </div>
         </div>
-    {/each}
+    </div>
+{/each}
+<div class="collapse">
+    <input type="checkbox" checked={true}/>
+    <div class="collapse-title">
+        <div class="divider divider-accent text-accent col-span-full">Uncategorized</div>
+    </div>
+    <div class="collapse-content">
+    {#if plotsNotInCollections.length > 0}
+        <div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch gap-4">
+        {#each plotsNotInCollections as key (key)}
+            {@const item = notNull($data.get(key))}
+            <GridCard {item} {key} {sharing} />
+        {/each}
+        </div>
+    {:else}
+        <span class="text-center col-span-full">Nothing to show, you're organized!</span>
     {/if}
+    </div>
 </div>
+{/if}
+
+<dialog bind:this={sharingModal} id="grid_modal" class="modal">
+    {#if plotInSharing}
+        <div class="modal-box flex flex-col items-center gap-4">
+            <h3 class="text-lg font-bold text-primary">{plotInSharing.name}</h3>
+            <p>is visible to</p>
+            <h3 class="text-lg font-bold underline decoration-dotted text-secondary">
+                {plotInSharing.public ? "anyone with the link" : "you"}
+            </h3>
+            <button class="btn btn-primary w-1/2">Turn {plotInSharing.public ? "off" : "on"} sharing</button>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    {/if}
+</dialog>

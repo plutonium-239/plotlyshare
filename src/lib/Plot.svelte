@@ -1,14 +1,13 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { data, forceDarkPlots, loggedIn, type PlotFullData } from './data';
-    // import Plotly from 'plotly.js-dist-min'
-    import type { Writable } from 'svelte/store';
+    import { cachedPlots, data, forceDarkPlots, loggedIn, plotTitle, type CachedPlot, type PlotFullData } from './data';
+        // import Plotly from 'plotly.js-dist-min'
     export let params: any;
     
     let plotContainer: HTMLDivElement
     let plotID = params.plotid
     let userID = params.uid
-    let plotLoaded: boolean = false
+    let plotLoaded = false
     let plotjson: PlotFullData | undefined
     let plotlyDarkTemplate: any
     let loadingProgress: string = "Initializing Plotly.js 🧐"
@@ -17,76 +16,70 @@
     .then((res) => res.json())
     .then(res => {plotlyDarkTemplate = res; console.log("Loaded force dark template");})
     
-
-    // window.onscroll = () => {};
     document.getElementById("header")!.classList.add('scrolled');
     
-    // onMount(async () => {
-    //     let plotHTML: string = ""
-    //     if (!$loggedIn) {
-    //         plotHTML = await fetch(`./demo_plots/${plotID}.html`).then((res) => res.text());
-    //         console.log("received plotHTML", plotHTML.length);
-    //     }
-    //     if (typeof window !== 'undefined') { 
-    //         // const Plotly = await import('plotly.js-dist'); // Import Plotly.js
-    //         // Plotly.purge(plotContainer)
-
-    //         // plotContainer.innerHTML = plotHTML; // Add the HTML
-    //         // console.log(`plotly is ${Plotly}`);
-            
-    //         const divFragment = document.createRange().createContextualFragment(plotHTML);
-    //         plotContainer.append(divFragment);
-    //         plotContainer.classList.toggle('skeleton')
-    //         // document.body.append(plotContainer);
-
-    //         // const scripts = plotContainer.getElementsByTagName('script');
-    //         // for (let script of scripts) {
-    //         //     const newScript = document.createElement('script');
-    //         //     newScript.textContent = script.textContent;
-    //         //     document.body.appendChild(newScript);
-    //         //     script.parentNode?.removeChild(script);
-    //         // }
-    //         Plotly.Plots.resize(document.querySelector('.plotly-graph-div.js-plotly-plot')! as HTMLElement);
-    //         console.log("resize success");
-            
-    //     }
-    // });
     $: if (Plotly) {
         loadingProgress = "Plotting Plotly Plot 😙\nFetching data"
     }
     onMount(async () => {
         await getDarkTemplate();
-        let plotURL: string | URL;
-        if ($data.has(plotID)) {
-            plotURL = $data.get(plotID)!.linked_file
+        let plotURL: string | undefined;
+        let plotData: CachedPlot = {} as CachedPlot
+        if ($cachedPlots.has(`${userID}/${plotID}`)) {
+            console.log("Loaded from cached data");
+            plotData = $cachedPlots.get(`${userID}/${plotID}`)!
+            plotjson = plotData.plot_data
+            plotLoaded = true
+        } else if (!$loggedIn && $data.has(plotID)) {
+            const plotinfo = $data.get(plotID)!
+            plotURL = plotinfo.linked_file
+            plotData.name = plotinfo.name
+            plotData.timestamp = plotinfo.timestamp
         } else {
             plotURL = `/api/plot/${userID}/${plotID}`
         }
-        plotjson = await fetch(plotURL)
-            .then((res) => res.json())
+        if (plotURL) {
+            console.log("entered fetcher with", plotURL);
+            plotjson = await fetch(plotURL)
+            .then((res) => {
+                console.log("received response from plot api");
+                plotData.name = res.headers.get('PlotlyShare-Plot-Name') ?? plotData.name ?? "No name found"
+                plotData.timestamp = parseInt(res.headers.get('PlotlyShare-Plot-Timestamp') ?? plotData.timestamp.toString() ?? "0")
+                return res.json()
+            })
             .catch((e) => {
                 console.error("error fetching plot plotjson");
                 console.log(e);
                 // return Error("error fetching plot plotjson")
             }) as PlotFullData
+            plotData.plot_data = plotjson
+            $cachedPlots.set(`${userID}/${plotID}`, plotData)
+            $cachedPlots = $cachedPlots
+            console.log("setting cachedPlots");
+            console.log($cachedPlots);
+        }
+
         if (plotjson) {
+            // setContext(`title${plotID}`, plotData.name)
+            $plotTitle = plotData.name
             await Plotly.newPlot(
                 plotContainer, 
                 plotjson.data, 
                 plotjson.layout, 
                 plotjson.config
             );
+            console.log("config was");
+            console.log(plotjson.config);            
             Plotly.Plots.resize(plotContainer);
             plotLoaded = true
             plotlyNormalTemplateFromPlot = structuredClone(plotjson.layout?.template)
             // console.log("original template");
             // console.log(plotlyNormalTemplateFromPlot);
-            plotContainer.classList.toggle('skeleton')   
         } else {
             loadingProgress = "Could not find plot 😔"
         }
     })
-    $: updatePlot($forceDarkPlots, plotLoaded).then(() => {console.log("Done")})
+    $: updatePlot($forceDarkPlots, plotLoaded).then(() => {console.log("Force dark plots Done")})
     const updatePlot = async (forceDarkPlots: boolean, plotLoaded: boolean) => {
         if (forceDarkPlots && plotLoaded) {
             console.log("Enabling force dark mode");
@@ -109,11 +102,8 @@
 
 <svelte:head>
     <link rel="stylesheet" href="/plotonly.css" />
-    <script
-        fetchpriority="high"
-        charset="utf-8"
-        src="https://cdn.plot.ly/plotly-2.25.2.min.js"
-    ></script>
+    <!-- REVIEW: update plotlyjs version manually or set to latest -->
+    <link rel="modulepreload" href="https://cdn.plot.ly/plotly-2.25.2.min.js"/>
 </svelte:head>
 <div
     class="w-full overflow-x-auto !h-[calc(100%-4em)]"
@@ -121,8 +111,8 @@
     bind:this={plotContainer}
 >
     {#if !plotLoaded}
-        <div
-            class="skeleton [animation-duration:1s] text-center flex justify-center items-center whitespace-pre-wrap"
+        <div class:skeleton={!plotLoaded}
+            class="[animation-duration:1s] text-center flex justify-center items-center whitespace-pre-wrap"
         >
             {loadingProgress}
         </div>
@@ -135,7 +125,7 @@
 <!-- </div> -->
 
 <style type="postcss">
-    :global(#plotContainer > div, .js-plotly-plot, .plot-container.plotly) {
-        @apply md:w-full md:h-full max-md:aspect-video max-md:min-h-[360px];
+    :global(#plotContainer, .js-plotly-plot, .plot-container.plotly) {
+        @apply w-auto md:w-full md:h-full max-md:aspect-video max-md:min-h-[360px];
     }
 </style>

@@ -19,7 +19,8 @@
     "paths": {
       "worker-auth-providers": ["./functions/worker-auth-providers"],
       "worker-auth-providers/*": ["./functions/worker-auth-providers/*"]
-    }
+    },
+    // "sourceMap": true
     // "moduleDetection": "force"
   },
   "include": [

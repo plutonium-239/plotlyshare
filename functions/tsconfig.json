@@ -1,8 +1,9 @@
 {
     "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "lib": ["esnext"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": ["esnext","DOM", "DOM.Iterable"],
         "types": ["@cloudflare/workers-types"],
+        "moduleResolution": "Bundler"
     }
 }

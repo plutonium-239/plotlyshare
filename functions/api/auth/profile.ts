@@ -43,7 +43,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         {
             status: 200,
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                'Cache-Control': `max-age=${3600}`
             }
         }
     )

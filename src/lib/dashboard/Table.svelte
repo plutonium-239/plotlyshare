@@ -3,7 +3,6 @@
     import DeleteIcon from '../icons/delete.svg?raw'
     import LinkIcon from '../icons/link.svg?raw'
 
-
 </script>
 
 <table class="table table-zebra table-xs md:table-lg sortable">
@@ -17,6 +16,7 @@
         </tr>
     </thead>
     <tbody class="">
+        <!-- {#await fetcher() then} -->
         {#if $data.size > 0 && dates.size > 0}
         {#each $data.entries() as [key, item] (key) }
             <tr>
@@ -51,6 +51,7 @@
             </tr>
         {/each}
         {/if}
+        <!-- {/await} -->
     </tbody>
     </table>
 

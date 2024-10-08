@@ -9,5 +9,6 @@ export default defineConfig({
     alias: {
       "worker-auth-providers": path.resolve(__dirname, 'worker-auth-providers')
     }
-  }
+  },
+  appType: "mpa"
 })

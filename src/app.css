@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 html {
-    @apply bg-base-100 text-primary overflow-x-hidden;
+    @apply bg-base-100 text-primary overflow-x-hidden cursor-crosshair;
 }
 
 body {
@@ -12,4 +12,12 @@ body {
 
 .col-hide-small {
 	@apply max-md:hidden overflow-hidden whitespace-nowrap text-ellipsis;
+}
+
+/* .js-plotly-plot .plotly [data-title]::before, .js-plotly-plot .plotly [data-title]::after {
+	top: 200%;
+} */
+
+.js-plotly-plot .plotly .modebar-btn {
+	@apply inline-block
 }

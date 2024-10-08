@@ -87,7 +87,7 @@
 <button on:click={() => profile_modal.showModal()} class="btn btn-circle btn-accent w-12">
     {@html ProfileIcon}
 </button>
-<dialog bind:this={profile_modal} class="modal">
+<dialog bind:this={profile_modal} class="modal" id="profile_modal">
     <div class="modal-box flex flex-col items-center">
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
