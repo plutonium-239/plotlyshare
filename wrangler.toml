@@ -13,6 +13,9 @@ id = "b06911459b1c412f897b5cd10c7fd45f"
 
 [env.production.vars]
 GOOGLE_REDIRECT_PROD_URL = "https://plotlyshare.pages.dev/api/auth/google/callback"
+FIREBASE_authDomain="plotlyshare-53aa2.firebaseapp.com"
+FIREBASE_projectId="plotlyshare-53aa2"
+FIREBASE_storageBucket="plotlyshare-53aa2.appspot.com"
 
 [env.production]
 kv_namespaces = [
