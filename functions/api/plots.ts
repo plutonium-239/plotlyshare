@@ -7,6 +7,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (decryptedjwt instanceof Response) return decryptedjwt;
     const uid = await hashThis(decryptedjwt.user_id)
 
+    console.log("env is");
+    console.log(context.env);
+
     const plotDataPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid, 'plots'), context)
     const collectionsPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid, 'collections'), context)
     const rootCollsPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid), context)
