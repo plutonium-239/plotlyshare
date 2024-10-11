@@ -1,21 +1,32 @@
 <script lang="ts">
+  import BreadCrumbs from './dashboard/BreadCrumbs.svelte';
+
     import type { UserData } from '../../functions/api/utils';
-    import { collections, dashboardView, data, getDemoMetadata, loggedIn, updateDates, updatePlotsNotInCollections } from './data';
+    import { collections, collection, dashboardView, data, getDemoMetadata, loggedIn, savedCollections, savedData, updateDates, updatePlotsNotInCollections, rootCollections, plotsNotInCollections } from './data';
     import Grid from './dashboard/Grid.svelte';
     import Table from './dashboard/Table.svelte';
     import TableIcon from './icons/table.svg?raw';
     import FolderIcon from './icons/folder.svg?raw';
+    import PlotIcon from './icons/icon-nobg.svg?raw'
     import GridIcon from './icons/list-grid.svg?raw';
     import RefreshIcon from './icons/refresh.svg?raw';
     import Folder from './dashboard/Folder.svelte';
-    
+
+    export let params: any;
+    // because we need it computed before everything else as well as reactively
+    let location: string[] = params?.wild?.split('/') ?? []
+    $: location = params?.wild?.split('/') ?? []
+
     document.getElementById("header")!.classList.remove('scrolled');
     
     // const local_format = Intl.DateTimeFormat();
-    let plotsFetching = true
-    updateDates($data)
-    
+    let plotsFetching = false
+    // updateDates($data)
+    // console.log({location});
+    $: if (location) {console.log("location trigger"); fetcher()}
+
     const fetcher = async () => {
+        if (plotsFetching) {console.log("early demise"); return}
         plotsFetching = true
         console.log("fetcher called");
         // let data: Map<string, PlotMetadata>
@@ -23,17 +34,18 @@
             // console.log($data);
             // if ($data.size === 0) 
             let demodata = await getDemoMetadata()
-            $data = demodata.plots
-            $collections = demodata.collections
-            console.log("existing NOT LOGGED IN", $data.size, "plots");
+            $savedData = demodata.plots
+            $savedCollections = demodata.collections
+            $rootCollections = demodata.rootCollections
+            console.log("existing NOT LOGGED IN", $savedData.size, "plots");
         } else {
-            console.log("existing LOGGED IN", $data.size, "plots");
+            console.log("existing LOGGED IN", $savedData.size, "plots");
             let res: UserData = await fetch('/api/plots').then(res => res.json())
             console.log('res')
             console.log(res);
             if (res.plots && (Object.keys(res.plots).length !== $data.size)) {
-                $data = new Map(Object.entries(res.plots))
-                console.log('$data udpated with res.plots');
+                $savedData = new Map(Object.entries(res.plots))
+                console.log('$savedData udpated with res.plots');
                 // console.log($data);
             } 
             // else if (Object.keys(res.plots).length === 0) {
@@ -42,17 +54,35 @@
             //     $data = new Map()
             // }
             if (res.collections && (Object.keys(res.collections).length !== $collections.size)) {
-                $collections = new Map(Object.entries(res.collections))
-                console.log('$collections');
-                console.log($collections);
+                $savedCollections = new Map(Object.entries(res.collections))
+                console.log({$savedCollections});
             }
+            if (res.rootCollections && (Object.keys(res.rootCollections).length !== $rootCollections.length)) {
+                $rootCollections = res.rootCollections
+                console.log({$rootCollections});
+            }
+        }
+        if (location.length > 0) {
+            // @ts-expect-error
+            $collection = $savedCollections.get(location[location.length-1])!
+            $collection!.id = location[location.length-1]
+            $collections = new Map($collection!.subcollections?.map((collid) => [collid, $savedCollections.get(collid)!]))
+            $data = new Map($collection!.members.map((plotid) => [plotid, $savedData.get(plotid)!]))
+        } else {
+            $collection = null
+            $data = $savedData
+            $collections = $savedCollections
         }
         updateDates($data)
         updatePlotsNotInCollections($data, $collections)
         $data = $data
+        $collections = $collections
+        console.log("Ending fetcher");
+        console.log({$data, $collections, $collection, plotsNotInCollections});
+        
         setTimeout(() => { plotsFetching = false }, 400)
     }
-    loggedIn.subscribe(async () => {await fetcher()})
+    loggedIn.subscribe(async () => {console.log("loggedin trigger"); fetcher();})
 
     // setInterval(() => {
     //     $loggedIn = false
@@ -69,18 +99,7 @@
 </svelte:head>
 <div class="md:px-24 xl:px-36 py-8 max-md:px-4 md:flex flex-col justify-center min-w-[100vw] w-fit">
 
-    <!-- TODO: REMOVE ALERT WHEN COLLECTION SUPPORT IS ADDED -->
-    <div role="alert" class="alert alert-info">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div class="flex flex-col items-center mr-auto ml-auto">
-            <span>Collections are WIP and not live yet</span>
-            <span class="text-xs">While you can use the UI, the backend has been disabled</span>
-        </div>
-    </div>
-
-    <div class="mb-4 w-full flex items-center">
+    <div class="mb-2 w-full flex items-center">
         <span class="tooltip tooltip-bottom" data-tip="Refresh Plots">
             <button on:click={fetcher} 
             class="btn btn-square btn-accent btn-outline btn-circle h-10 w-10 min-h-8 p-2"
@@ -90,37 +109,49 @@
                 </span>
             </button>
         </span>
-        <div class="w-10 mr-auto"></div>
-        <span>
+        <div class="w-24 max-md:w-0"></div>
+        <span class="px-4 ml-auto mr-auto flex gap-4">
             {#if plotsFetching}
             Fetching latest plots...
             {:else}
-            {$data.size} plots
+            <div class="inline-flex gap-1">
+                {$collections.size} <span class="h-6 w-6">{@html FolderIcon}</span>
+            </div>
+            <div class="inline-flex gap-1">
+                {$data.size} <span class="h-6 w-6">{@html PlotIcon}</span>
+            </div>
             {/if}
         </span>
-        <div class="join gap-1 w-fit p-2 max-md:right-0 ml-auto">
-            <span class="tooltip tooltip-bottom" data-tip="Table View">
-                <button on:click={() => {$dashboardView = "table"}} class:btn-secondary={$dashboardView == 'table'}
-                    class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
-                >
-                    {@html TableIcon}
-                </button>
-            </span>
-            <span class="tooltip tooltip-bottom" data-tip="Grid View">
-                <button on:click={() => {$dashboardView = "grid"}} class:btn-secondary={$dashboardView == 'grid'}
-                    class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
-                >
-                    {@html GridIcon}
-                </button>
-            </span>
+        <div class="inline-flex">
             <span class="tooltip tooltip-bottom" data-tip="Folder View">
                 <button on:click={() => {$dashboardView = "folder"}} class:btn-secondary={$dashboardView == 'folder'}
-                    class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
+                    class="btn btn-square h-10 w-10 min-h-8 p-2" 
                 >
                     {@html FolderIcon}
                 </button>
             </span>
+            <div class="divider divider-horizontal mx-0"></div>
+            <div class="join w-fit max-md:right-0">
+                <span class="tooltip tooltip-bottom" data-tip="Table View">
+                    <button on:click={() => {$dashboardView = "table"}} class:btn-secondary={$dashboardView == 'table'}
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
+                    >
+                        {@html TableIcon}
+                    </button>
+                </span>
+                <span class="tooltip tooltip-bottom" data-tip="Grid View">
+                    <button on:click={() => {$dashboardView = "grid"}} class:btn-secondary={$dashboardView == 'grid'}
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
+                    >
+                        {@html GridIcon}
+                    </button>
+                </span>
+            </div>
         </div>
+
+    </div>
+    <div class="mb-4 px-4 flex items-center self-center w-full md:w-fit justify-center bg-base-200 rounded-xl">
+        <BreadCrumbs {location} />
     </div>
 
     {#if $dashboardView == 'table'}
@@ -135,7 +166,7 @@
 
 <style type="text/postcss">
     :root {
-        @apply [--header-padding-x:6em] lg:[--header-padding-x:12em];
+        @apply [--header-padding-x:6em] lg:[--header-padding-x:9em];
     }
     :global(.custom-btn) {
         @apply box-border md:box-content p-1;

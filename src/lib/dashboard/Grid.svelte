@@ -1,6 +1,6 @@
 <script lang="ts">
     import GridCard from "./GridCard.svelte";
-    import { data, collections, dates, plotsNotInCollections, type PlotMetadata } from "../data";
+    import { data, collections, collection, dates, plotsNotInCollections, type PlotMetadata, savedCollections, updatePlotsNotInCollections } from "../data";
     let sharingModal: HTMLDialogElement;
 
     function notNull(x: any) {
@@ -12,18 +12,20 @@
         sharingModal.showModal();
         plotInSharing = $data.get(plotid)!;
     }
+    $: if ($collection) updatePlotsNotInCollections($data, $collections)
 
 </script>
 
 {#if $data.size > 0 && dates.size > 0}
-{#each $collections as [key, coll]}
+{#each $collections as [collid] (collid)}
+    {@const coll = notNull($savedCollections.get(collid))}
     <div class="collapse">
         <input type="checkbox" checked={true}/>
-        <div class="collapse-title">
+        <div class="collapse-title px-4">
             <div class="divider divider-accent text-accent col-span-full">{coll.name}</div>
         </div>
         <div class="collapse-content">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch gap-4">
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch gap-4">
             {#each coll.members as key (key)}
                 {@const item = notNull($data.get(key))}
                 <GridCard {item} {key} {sharing} />
@@ -34,11 +36,11 @@
 {/each}
 <div class="collapse">
     <input type="checkbox" checked={true}/>
-    <div class="collapse-title">
+    <div class="collapse-title px-4">
         <div class="divider divider-accent text-accent col-span-full">Uncategorized</div>
     </div>
     <div class="collapse-content">
-    {#if plotsNotInCollections.length > 0}
+    {#if plotsNotInCollections.length > 0 && $collection}
         <div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch gap-4">
         {#each plotsNotInCollections as key (key)}
             {@const item = notNull($data.get(key))}

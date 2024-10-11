@@ -2,7 +2,7 @@
     import SharedIcon from "../icons/shared.svg?raw";
     import EyeHiddenIcon from "../icons/eye-hidden.svg?raw";
     import type { CollectionData } from "../../../functions/api/utils";
-    import type { PlotMetadata } from "../data";
+    import { collection, type PlotMetadata } from "../data";
     import FolderIcon from '../icons/folder.svg?raw'
     import PlotIcon from '../icons/icon-nobg.svg?raw'
 
@@ -16,9 +16,28 @@
     let plotsToTake = Object.fromEntries(Object.keys(currentPlots).map((plotID) => [plotID, false]));
 
     async function makeNewCollection() {
+        if (!name) return
         let collid = await fetch('https://uuid.rocks/short').then(res => res.text())
+        let coll = {
+            name: name,
+            id: collid,
+            members: Object.entries(plotsToTake).filter((value) => value[1]).map((value) => value[0]),
+            subcollections: Object.entries(collsToTake).filter((value) => value[1]).map((value) => value[0]),
+            public: makePublic,
+            parent: $collection?.id
+        }
+        console.log("current collection id is", $collection?.id);
 
-        
+
+        let res = await fetch('/api/newcollection',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(coll)
+            }
+        )
     }
 </script>
 
@@ -79,6 +98,10 @@
             </div>
         {/each}
     </div>
+    <form method="dialog" class="modal-action">
+        <button class="btn btn-success" on:click={makeNewCollection}>Create</button>
+        <button class="btn btn-error">Cancel</button>
+    </form>
 </div>
 <form method="dialog" class="modal-backdrop">
     <button>close</button>

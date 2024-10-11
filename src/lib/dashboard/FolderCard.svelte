@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { data, dates, plotsNotInCollections, profile, type PlotMetadata } from "../data";
+    import { data, dates, plotsNotInCollections, profile, savedCollections, type PlotMetadata } from "../data";
     import DeleteIcon from '../icons/delete.svg?raw'
     import SharedIcon from '../icons/shared.svg?raw'
     import EyeHiddenIcon from '../icons/eye-hidden.svg?raw'
@@ -7,14 +7,30 @@
     import FolderIcon from '../icons/folder.svg?raw'
     import PlotIcon from '../icons/icon-nobg.svg?raw'
     
-    export let item: CollectionData
     export let key: string
+    let item: CollectionData
+    let uncategorizedCollection: CollectionData
+    let link: string
 
+    $: if (key) {
+        // console.log("updating folder card for", key);
+        uncategorizedCollection = {
+            name: "Uncategorized",
+            members: plotsNotInCollections,
+            subcollections: [],
+            public: false
+        } as CollectionData
+        item = key.startsWith('uncategorized-') ? uncategorizedCollection : $savedCollections.get(key)!
+        // console.log({item})
+        link = key.startsWith('uncategorized-') ? "" : key
+    }
+    
 </script>
 
+
 <div class="card folder bg-base-200 hover:bg-accent/15 hover:-translate-y-1 transition-all duration-150 aspect-video shadow-lg">
-    <!-- <a class="absolute w-full h-full hover:bg-secondary/15 transition-colors duration-150 rounded-xl" 
-        href="#/plot/{$profile.uid}/{key}" title="Open Plot"> </a> -->
+    <a class="absolute w-full h-full hover:bg-secondary/15 transition-colors duration-150 rounded-xl" 
+        href="#/dash/{link}" title="Open Collection"> </a>
     
     <div class="card-body">
         <span class="card-title z-[5] text-primary">{item.name}</span>

@@ -1,25 +1,17 @@
 <script lang="ts">
     import type { CollectionData } from "../../../functions/api/utils";
-    import { data, collections, dates, plotsNotInCollections, type PlotMetadata } from "../data";
+    import { data, collections, collection, dates, plotsNotInCollections, type PlotMetadata } from "../data";
     import FolderCard from "./FolderCard.svelte";
     import AddIcon from '../icons/add.svg?raw';
     import NewCollection from "./NewCollection.svelte";
 
-    let sharingModal: HTMLDialogElement
-
-    function notNull(x: any) {
-        return x!
-    }
-    let uncategorizedCollection: CollectionData = {
-        name: "Uncategorized",
-        members: plotsNotInCollections,
-        subcollections: [],
-        public: false
-    }
+    let collectionModal: HTMLDialogElement
 
     function startMakeNewCollection() {
-        sharingModal.showModal()
+        collectionModal.showModal()
     }
+    // $: console.log("collections changed", $collections.size);
+    
 </script>
 
 <button class="btn btn-primary w-full text-lg items-center mb-4" on:click={startMakeNewCollection}>
@@ -27,14 +19,14 @@
     New collection
 </button>
 {#if $data.size > 0 && dates.size > 0}
-<div class="grid md:grid-cols-2 xl:grid-cols-3 items-stretch gap-4">
-    {#each $collections as [key, coll]}
-        <FolderCard {key} item={coll} />
+<div class="grid sm:grid-cols-2 xl:grid-cols-3 items-stretch gap-4">
+    {#each $collections as [key] (key)}
+        <FolderCard {key} />
     {/each}
-    <FolderCard key="" item={uncategorizedCollection} />
+    <FolderCard key="uncategorized-{$collection?.id}" />
     
 </div>
 {/if}
-<dialog class="modal" id="sharing_modal" bind:this={sharingModal}>
+<dialog class="modal" id="sharing_modal" bind:this={collectionModal}>
     <NewCollection currentCollections={$collections} currentPlots={$data} />
 </dialog>

@@ -10,7 +10,7 @@
         <tr class="bg-base-300 text-secondary md:text-lg">
             <th class="th-name">Name</th>
             <th class="no-sort text-center">Link</th>
-            <th class="max-lg:hidden">ID</th>
+            <th class="max-xl:hidden">ID</th>
             <th class="th-time">Time Created</th>
             <th class="no-sort text-center">Delete</th>
         </tr>
@@ -36,7 +36,7 @@
                         {@html LinkIcon}
                     </a> 
                 </td>
-                <td class='max-lg:hidden'>{ key }</td>
+                <td class='max-xl:hidden'>{ key }</td>
                 <td class='date-formattable max-md:w-12'>
                     <span class="col-hide-small">{ dates.get(key)?.long_time }</span>
                     <span class="block md:hidden">{ dates.get(key)?.short_time }</span>

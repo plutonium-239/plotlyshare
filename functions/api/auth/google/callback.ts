@@ -77,8 +77,18 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
             body: JSON.stringify(createFirestoreDocument(profile))
         }
     )
+    const promiseFIRErootColl = makeAPIfetch(
+        makeRESTdocURL(context.env, "userdata", rid),
+        context,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(createFirestoreDocument({
+                rootCollections: []
+            }))
+        }
+    )
 
-    return Promise.all([promiseRTKV, promiseFIRE])
+    return Promise.all([promiseRTKV, promiseFIRE, promiseFIRErootColl])
     // await setDoc(doc(metadata, 'userdata', rid), )
 }
 

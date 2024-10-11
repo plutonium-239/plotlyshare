@@ -4,9 +4,9 @@
     import SharedIcon from '../icons/shared.svg?raw'
     import EyeHiddenIcon from '../icons/eye-hidden.svg?raw'
     
-    export let item: PlotMetadata
     export let key: string
     export let sharing: (s: string) => void
+    export let item: PlotMetadata
 
     function openSharingWithPlot() {
         console.log("open sharing with", item.name);

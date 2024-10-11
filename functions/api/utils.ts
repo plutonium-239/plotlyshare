@@ -47,14 +47,15 @@ export type CollectionData = {
     public: boolean,
     name: string,
     members: string[] // plots only
-    subcollections: CollectionData[]
+    subcollections: string[]
 }
 
 export type UserData = {
-    collections: {
+    collections: {  // is a firestore collection
         [collectionID: string]: CollectionData
     }
-    plots: {
+    rootCollections: string[],  // is a FIELD on the useruid document itself
+    plots: {    // is a firestore collection
         [plotID: string]: PlotData
     }
 }
@@ -70,7 +71,6 @@ export async function verifyAndDecodeJWT(request: Request, secret: string) {
         find(c => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
 
     console.log('signedjwt', signedjwt);
-    console.log('secret', secret);
     if (!signedjwt || (! await jwt.verify(signedjwt, secret))) {
         return new Response(
             "The credentials could not be verified, please log out and log in again.",
@@ -117,7 +117,7 @@ export type FirestoreField = {
     arrayValue?: { values: FirestoreField[] };
     mapValue?: { fields: { [key: string]: FirestoreField } };
 };
-type DocumentFields = { [s: string]: any }
+export type DocumentFields = { [s: string]: any }
 
 export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
     const convertedData: DocumentFields = {};
@@ -132,7 +132,7 @@ export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
         } else if (field.timestampValue !== undefined) {
             convertedData[key] = new Date(field.timestampValue);
         } else if (field.arrayValue !== undefined) {
-            console.log(field.arrayValue);
+            // console.log('array field values', field.arrayValue);
             convertedData[key] = convertFirestoreArray(field.arrayValue);
         } else if (field.mapValue !== undefined) {
             convertedData[key] = convertFirestoreData(field.mapValue);
@@ -143,7 +143,8 @@ export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
     return convertedData;
 }
 
-function convertFirestoreArray(array: { values: FirestoreField[] }): any[] {
+function convertFirestoreArray(array: { values?: FirestoreField[] }): any[] {
+    if (!array.values) return []
     const javascriptIsTheWorstChoice = Object.fromEntries(Object.entries(array.values))
     const out = convertFirestoreData({ fields: javascriptIsTheWorstChoice })
     return Object.values(out)
@@ -173,7 +174,7 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
         .then(res => res.json())
         .catch((err) => {
             console.log("ERRORED OUT");
-            console.log(err);
+            console.error(err);
             console.log(err.details);
         });
     let t2 = performance.now()
@@ -181,7 +182,7 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
 
     console.log("result", result);
     if (result.error) {
-        console.log("error details", result.error.details ?? result.error);
+        console.error("error details", result.error.details ?? result.error);
         return {}
     }
     let resultParsed: DocumentFields = {}
@@ -199,27 +200,30 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
     return resultParsed
 }
 
+function coreConverter(value: any): {[key: string]: any} {
+    if (typeof value === 'string') {
+        return { stringValue: value };
+    } else if (typeof value === 'number') {
+        return { integerValue: value };
+    } else if (typeof value === 'boolean') {
+        return { booleanValue: value };
+    } else if (value instanceof Date) {
+        return { timestampValue: value.toISOString() };
+    } else if (Array.isArray(value)) {
+        const out = value.map((z) => coreConverter(z));
+        return { arrayValue: { values: out } };
+    } else if (typeof value === 'object' && value !== null) {
+        return { mapValue: { fields: createFirestoreDocument(value) } };
+    } else {
+        throw new Error(`Unsupported data type: ${typeof value}`);
+    }
+}
 export function createFirestoreDocument(data: DocumentFields) {
     const fields: { [key: string]: FirestoreField } = {};
+
     for (const key in data) {
         const value = data[key];
-        if (typeof value === 'string') {
-            fields[key] = { stringValue: value };
-        } else if (typeof value === 'number') {
-            fields[key] = { integerValue: value };
-        } else if (typeof value === 'boolean') {
-            fields[key] = { booleanValue: value };
-        } else if (value instanceof Date) {
-            fields[key] = { timestampValue: value.toISOString() };
-        } else if (Array.isArray(value)) {
-            const jsBAD = Object.entries(value)
-            const out = Object.values(createFirestoreDocument(jsBAD).fields)
-            fields[key] = { arrayValue: { values: out } };
-        } else if (typeof value === 'object' && value !== null) {
-            fields[key] = { mapValue: { fields: createFirestoreDocument(value) } };
-        } else {
-            throw new Error(`Unsupported data type: ${typeof value}`);
-        }
+        fields[key] = coreConverter(value);
     }
     return { fields };
 }

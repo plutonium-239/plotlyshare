@@ -7,22 +7,18 @@
     import Profile from "./lib/Profile.svelte";
     // import { text } from "itty-router";
     import  { location } from 'svelte-spa-router';
-    import { cachedPlots, forceDarkPlots, getDemoMetadata, loggedIn, plotTitle, type CachedPlot, type PlotMetadata } from "./lib/data";
-    import { getContext, onMount } from "svelte";
+    import { plotTitle } from "./lib/data";
+    import Landing from "./lib/Landing.svelte";
 
     const routes = {
-        // Exact path
-        '/': Dashboard,
-
-        // Using named parameters, with last being optional
+        '/': Landing,
+        '/dash/*': Dashboard,
         '/plot/:uid/:plotid': Plot,
-
-        // Catch-all
-        // This is optional, but if present it must be the last
         '*': Page404,
     }
-    window.onscroll = () => {
-        if ($location !== '/') return
+    console.log({$location});
+    window.onscroll = () => {        
+        if (!$location.startsWith('/dash/')) return
         // console.log("executing on location", $location);
         
         let header = document.getElementById("header")!
@@ -32,7 +28,7 @@
 
     function updateTitleFromPlot(location: string, plotTitle: string) {
         if (location.startsWith('/plot/')) title = plotTitle
-        else if (location === '/') title = "All Plots"
+        else if (location.startsWith('/dash/')) title = "All Plots"
     }
     $: updateTitleFromPlot($location, $plotTitle)
 
