@@ -6,7 +6,7 @@
     export let key: string
     export let visible: boolean
 
-    if (!key.startsWith("demo.")) sharingPlot = () => {}
+    if (key.startsWith("demo.")) sharingPlot = () => {}
 </script>
 
 <button title={visible ? "Plot is public": "Plot is private"} type="button" on:click={() => sharingPlot(key)}

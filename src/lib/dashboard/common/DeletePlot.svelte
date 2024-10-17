@@ -4,7 +4,7 @@
     export let deletePlot: (key: string) => void
     export let key: string
 
-    if (!key.startsWith("demo.")) deletePlot = () => {}
+    if (key.startsWith("demo.")) deletePlot = () => {}
 </script>
 
 <button type="submit" on:click={() => deletePlot(key)}
