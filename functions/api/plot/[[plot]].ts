@@ -137,6 +137,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         public?: boolean,
     }
     const updates: Update = await request.json()
+    if (!updates.name && updates.public === undefined) return new Response("Bad request, no updates.", {status: 400})
 
     const user = await context.env.basicprofileKV.get(requesterUID)
     const userParsed : BasicProfileInKV = JSON.parse(user)
@@ -150,7 +151,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         }
     )
     const plot: PlotData = await makeAPIfetch(makeRESTdocURL(context.env, "userdata", requesterUID, 'plots', plotid), context) as PlotData
-   
+
     if (updates.name) {
         const fileMetadata = {
             name: `${plotid}-${updates.name}.json`,
@@ -164,7 +165,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         
     const plotlyshareMetadata: {[k: string]: any} = {}
     if (updates.name) plotlyshareMetadata.name = updates.name;
-    if (updates.public) plotlyshareMetadata.public = updates.public;
+    if (updates.public !== undefined) plotlyshareMetadata.public = updates.public;
     console.log("Plot metadata", {plotlyshareMetadata, id: plotid});
        
     const qstr = queryString.stringify({'updateMask.fieldPaths': Object.keys(plotlyshareMetadata)})
