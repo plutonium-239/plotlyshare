@@ -56,7 +56,9 @@
             <img class="z-20 rounded-full shadow-[black] shadow-lg" src={$profile.picture} alt="profile"/>
         </div>
         <h3 class="text-lg font-bold">Hello {$profile.name}!</h3>
-        <a class="btn btn-error btn-outline mt-4" href="/api/auth/logout">Log Out</a>
+        <a class="btn btn-error btn-outline mt-4" href="/api/auth/logout" role="button" on:click={() => {$loggedIn = false}}>
+            Log Out
+        </a>
 
         <div class="divider text-primary">CLI Token</div>
         <div class="join join-vertical w-full">

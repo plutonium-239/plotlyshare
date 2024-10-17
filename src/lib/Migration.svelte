@@ -92,7 +92,7 @@
     
 </script>
 
-<div class="collapse bg-base-200 overflow-y-visible">
+<div class="collapse bg-base-200 overflow-y-clip">
     <input type="checkbox" bind:checked={migrateCollapseOpen} />
     <div class="collapse-title text-xl font-medium flex gap-4 items-center">
         <div class="w-8 h-8 transition-transform duration-150" class:rotate-90={migrateCollapseOpen}>
