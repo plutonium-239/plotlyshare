@@ -4,117 +4,122 @@
             "public": true,
             "name": "sample plots",
             "members": [
-                "3dec10ff0d4dc791d40e6b469a60ae16",
-                "8e5a37481a2578e3b4ffbd2b9b39a605",
-                "957d58a7cd9e41c652d8cc1d02d486ba",
-                "cd2eaf56fe75dbda89d8ddb01ad9c69c",
-                "42cdeffe25cab1f528cf47554e59b5e7",
-                "da2938bdb028899928cde3467fb7bf7f",
-                "3075c0894dc9cc642766bb3437882bcb",
-                "ab1dd8bd1676ad58e8321e6c27c63116",
-                "fd7bc0cb4f363405ca5cfd322e7d06ef",
-                "f181a8dc4a21e17c11f56d78656829b2",
-                "f515669629859a4de61fca694dc0d780",
-                "08eed185d836d24f3061eba2d71f40e0",
-                "81b9314703a002f021880c256d1660f8",
-                "44746dbeaa70e586308aa4eeb76f1f29"
+                "demo.3dec10ff0d4dc791d40e6b469a60ae16",
+                "demo.8e5a37481a2578e3b4ffbd2b9b39a605",
+                "demo.957d58a7cd9e41c652d8cc1d02d486ba",
+                "demo.cd2eaf56fe75dbda89d8ddb01ad9c69c",
+                "demo.42cdeffe25cab1f528cf47554e59b5e7",
+                "demo.da2938bdb028899928cde3467fb7bf7f",
+                "demo.3075c0894dc9cc642766bb3437882bcb"
             ]
-        } 
+        },
+        "mGL2Anp3ETuR6pxVJDnTjn": {
+            "public": true,
+            "name": "user submitted samples from plotlyshare v1",
+            "members": [
+                "demo.ab1dd8bd1676ad58e8321e6c27c63116",
+                "demo.fd7bc0cb4f363405ca5cfd322e7d06ef",
+                "demo.f181a8dc4a21e17c11f56d78656829b2",
+                "demo.f515669629859a4de61fca694dc0d780",
+                "demo.81b9314703a002f021880c256d1660f8",
+                "demo.44746dbeaa70e586308aa4eeb76f1f29"
+            ]
+        }
     },
     "rootCollections": ["gTq9qoXJ1igEGBo2o7LUoE"],
     "plots": {
-        "3dec10ff0d4dc791d40e6b469a60ae16": {
+        "demo.3dec10ff0d4dc791d40e6b469a60ae16": {
             "public": true,
             "name": "sine curve",
             "time_created": "2023-11-06T05:43:37+0000",
             "timestamp": 1699249417,
             "linked_file": "/demo_plots/3dec10ff0d4dc791d40e6b469a60ae16.json"
         },
-        "8e5a37481a2578e3b4ffbd2b9b39a605": {
+        "demo.8e5a37481a2578e3b4ffbd2b9b39a605": {
             "public": true,
             "name": "results - logx vs y",
             "time_created": "2023-11-06T05:44:11+0000",
             "timestamp": 1699249451,
             "linked_file": "/demo_plots/8e5a37481a2578e3b4ffbd2b9b39a605.json"
         },
-        "957d58a7cd9e41c652d8cc1d02d486ba": {
+        "demo.957d58a7cd9e41c652d8cc1d02d486ba": {
             "public": true,
             "name": "running out of sample names",
             "time_created": "2023-11-06T05:46:11+0000",
             "timestamp": 1699249571,
             "linked_file": "/demo_plots/957d58a7cd9e41c652d8cc1d02d486ba.json"
         },
-        "cd2eaf56fe75dbda89d8ddb01ad9c69c": {
+        "demo.cd2eaf56fe75dbda89d8ddb01ad9c69c": {
             "public": true,
             "name": "dark template 20th Dec",
             "time_created": "2023-12-20T09:19:57+0000",
             "timestamp": 1703063997,
             "linked_file": "/demo_plots/cd2eaf56fe75dbda89d8ddb01ad9c69c.json"
         },
-        "42cdeffe25cab1f528cf47554e59b5e7": {
+        "demo.42cdeffe25cab1f528cf47554e59b5e7": {
             "public": true,
             "name": "ossified mustard 22nd Dec",
             "time_created": "2023-12-22T22:07:55+0530",
             "timestamp": 1703263075,
             "linked_file": "/demo_plots/42cdeffe25cab1f528cf47554e59b5e7.json"
         },
-        "da2938bdb028899928cde3467fb7bf7f": {
+        "demo.da2938bdb028899928cde3467fb7bf7f": {
             "public": true,
             "name": "boundless exception 23rd Dec",
             "time_created": "2023-12-23T05:41:15+0530",
             "timestamp": 1703290275,
             "linked_file": "/demo_plots/da2938bdb028899928cde3467fb7bf7f.json"
         },
-        "3075c0894dc9cc642766bb3437882bcb": {
+        "demo.3075c0894dc9cc642766bb3437882bcb": {
             "public": true,
             "name": "fresh boudoir 25th Jan",
             "time_created": "2024-01-25T23:20:20+0530",
             "timestamp": 1706205020,
             "linked_file": "/demo_plots/3075c0894dc9cc642766bb3437882bcb.json"
         },
-        "ab1dd8bd1676ad58e8321e6c27c63116": {
+        "demo.ab1dd8bd1676ad58e8321e6c27c63116": {
             "public": true,
             "name": "crooked spelt 20th Apr",
             "time_created": "2024-04-20T12:53:12+1000",
             "timestamp": 1713581592,
             "linked_file": "/demo_plots/ab1dd8bd1676ad58e8321e6c27c63116.json"
         },
-        "fd7bc0cb4f363405ca5cfd322e7d06ef": {
+        "demo.fd7bc0cb4f363405ca5cfd322e7d06ef": {
             "public": true,
             "name": "sparkling offence 25th Apr",
             "time_created": "2024-04-25T13:37:52-0500",
             "timestamp": 1714070272,
             "linked_file": "/demo_plots/fd7bc0cb4f363405ca5cfd322e7d06ef.json"
         },
-        "f181a8dc4a21e17c11f56d78656829b2": {
+        "demo.f181a8dc4a21e17c11f56d78656829b2": {
             "public": true,
             "name": "skinny philosophy 29th Apr",
             "time_created": "2024-04-29T10:00:53+0800",
             "timestamp": 1714356053,
             "linked_file": "/demo_plots/f181a8dc4a21e17c11f56d78656829b2.json"
         },
-        "f515669629859a4de61fca694dc0d780": {
+        "demo.f515669629859a4de61fca694dc0d780": {
             "public": true,
             "name": "vast restaurant 27th May",
             "time_created": "2024-05-27T11:02:56+0800",
             "timestamp": 1716778976,
             "linked_file": "/demo_plots/f515669629859a4de61fca694dc0d780.json"
         },
-        "08eed185d836d24f3061eba2d71f40e0": {
+        "demo.08eed185d836d24f3061eba2d71f40e0": {
             "public": true,
             "name": "statuesque blog 17th May",
             "time_created": "2024-05-17T17:54:06+0800",
             "timestamp": 1715939646,
             "linked_file": "/demo_plots/08eed185d836d24f3061eba2d71f40e0.json"
         },
-        "81b9314703a002f021880c256d1660f8": {
+        "demo.81b9314703a002f021880c256d1660f8": {
             "public": false,
             "name": "alcoholic lord 22nd Aug",
             "time_created": "2024-08-22T11:01:03-0500",
             "timestamp": 1724342463,
             "linked_file": "/demo_plots/81b9314703a002f021880c256d1660f8.json"
         },
-        "44746dbeaa70e586308aa4eeb76f1f29": {
+        "demo.44746dbeaa70e586308aa4eeb76f1f29": {
             "public": true,
             "name": "merciful airman 28th Apr",
             "time_created": "2024-04-28T16:39:41+0800",

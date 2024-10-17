@@ -66,7 +66,11 @@ type DecryptedJWT = {
     user_id: string
 }
 
-export async function verifyAndDecodeJWT(request: Request, secret: string) {
+export async function verifyAndDecodeJWT(
+    context: EventContext<Env, any, Record<string, unknown>>, 
+    secret: string
+): Promise<Response | { uid: string; gid: any; }> {
+    const request = context.request
     const signedjwt = request.headers.get('Cookie')?.split('; ').
         find(c => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
 
@@ -78,7 +82,22 @@ export async function verifyAndDecodeJWT(request: Request, secret: string) {
         )
     }
     // @ts-expect-error
-    return jwt.decode(signedjwt).payload! as DecryptedJWT
+    let decryptedjwt = jwt.decode(signedjwt).payload! as DecryptedJWT
+    if (parseInt(decryptedjwt.exp) <= Date.now()/1000) {
+        return new Response(
+            "Your credentials have expired, please log in again.",
+            { status: 401 }
+        )
+    }
+    let uid = decryptedjwt.user_id
+    let gid = await context.env.basicprofileKV.get(uid)
+    if (!gid) {
+        return new Response(
+            "Unknown user.",
+            { status: 401 }
+        )
+    }
+    return {uid, gid}
 }
 
 export async function verifyCLIToken(request: Request, env: Env) {
@@ -153,6 +172,8 @@ function convertFirestoreArray(array: { values?: FirestoreField[] }): any[] {
 
 let accessToken: string
 export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Record<string, unknown>>, extraHeaders?: RequestInit<CfProperties<unknown>>) {
+    // console.log("making request to", url);
+    
     let t0 = performance.now()
     
     if (!accessToken) {
@@ -180,9 +201,11 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
     let t2 = performance.now()
     console.log("actual fetch took", t2-t1, "ms");
 
-    console.log("result", result);
+    // console.log("result", result);
     if (result.error) {
-        console.error("error details", result.error.details ?? result.error);
+        if (Array.isArray(result.error.details)) console.error("detailed error (array)", result.error.details[0]);
+        if (result.error.details) console.error("error details", result.error.details);
+        else console.error("error", result.error);
         return {}
     }
     let resultParsed: DocumentFields = {}
@@ -196,7 +219,7 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
     let t3 = performance.now()
     console.log("parsing fetched data took", t3-t2, "ms");
 
-    console.log("resultParsed", resultParsed);
+    // console.log("resultParsed", resultParsed);
     return resultParsed
 }
 
@@ -231,12 +254,12 @@ export function createFirestoreDocument(data: DocumentFields) {
 
 export type DriveOptions = 'fields' // | 'access_token'
 
-export async function drivePutMeta(fileMetadata: any, access_token: string, options: Record<DriveOptions, any>) {
+export async function drivePutMeta(fileMetadata: any, access_token: string, options?: Record<DriveOptions, any>, method: string = 'POST') {
     const encodedMetadata = JSON.stringify(fileMetadata);
 
     const urlparams = queryString.stringify(options)
     return fetch(`https://www.googleapis.com/drive/v3/files?${urlparams}`, {
-        method: 'POST',
+        method: method,
         headers: {
             'Authorization': `Bearer ${access_token}`,
             'Content-Type': `application/json`,
@@ -245,11 +268,14 @@ export async function drivePutMeta(fileMetadata: any, access_token: string, opti
     }).then(data => data.json())
 }
 
-export async function driveGet(fileId: string, access_token: string) {
-    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+export async function driveGet(fileId: string, access_token: string, method: string = 'GET', body?: BodyInit) {
+    const params = method === "GET" ? "?alt=media" : ""
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}${params}`, {
+        method: method,
         headers: {
             'Authorization': `Bearer ${access_token}`,
         },
+        body: body
     })
 }
 
@@ -276,7 +302,7 @@ export async function drivePutMultipart(fileMetadata: any, fileBody: string, acc
         fileBody+'\r\n'+
         close_delim;
 
-    console.log(multipartBody);
+    // console.log(multipartBody);
     
 
     const urlparams = queryString.stringify(options)

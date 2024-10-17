@@ -11,7 +11,7 @@ export const loggedIn = persisted('loggedIn', false)
 /**
  * The type of view to use for the dashboard.
  */
-type DashboardView = 'table' | 'grid' | 'folder'
+type DashboardView = 'table' | 'grid' | 'folder' | 'tree'
 /**
  * The current view of the dashboard.
  */
@@ -97,37 +97,37 @@ const mapSerializer = {
 }
 
 /**
- * The saved plot metadata.
+ * **All** the saved plot metadata.
  */
 export let savedData = persisted('metadata', new Map() as Map<string, PlotMetadata>, {serializer: mapSerializer})
 /**
- * The current plot metadata.
+ * The **current** collection's plot metadata.
  */
 export let data = writable(new Map() as Map<string, PlotMetadata>)
 /**
- * The saved collection data.
+ * **All** the saved collections.
  */
 export let savedCollections = persisted('collections', new Map() as Map<string, CollectionData>, {serializer: mapSerializer})
 
 /**
- * The root collections of the user.
+ * Root collections of the user.
  */
 export let rootCollections = persisted('rootCollections', [] as string[])
 /**
- * The current collection data.
+ * The **current** collection data.
  */
 export let collections = writable(new Map() as Map<string, CollectionData>)
 /**
  * The current collection.
  */
-export let collection = writable({} as (CollectionData & {id: string}) | null)
+export let collection = persisted('lastViewedCollection', {} as (CollectionData & {id: string}) | null)
 /**
  * A map of plot IDs to their long and short time strings.
  */
 export let dates : Map<string, {long_time: string, short_time: string}> = new Map()
 
 /**
- * The cached plots.
+ * The cached plots (*actual plot data, not metadata*).
  */
 export let cachedPlots = persisted('cachedPlots', new Map() as Map<string, CachedPlot>, {serializer: mapSerializer})
 
@@ -169,7 +169,7 @@ export function updateDates(data: Map<string, PlotMetadata>) {
 /**
  * A list of plot IDs that are not in any collection.
  */
-export let plotsNotInCollections: string[] = []
+export let plotsNotInCollections: Writable<string[]> = writable([])
 
 /**
  * Updates the list of plots that are not in any collection.
@@ -178,20 +178,19 @@ export let plotsNotInCollections: string[] = []
  */
 export function updatePlotsNotInCollections(data: Map<string, PlotMetadata>, collections: Map<string, CollectionData>) {
     console.log("plots not in collection updated");
-    plotsNotInCollections = []
+    plotsNotInCollections.set([])
     data.forEach((plot, plotid) => {
-        // console.log(`searching for plot ${plotid}`);
         let found = false
         for (const [key, value] of collections) {
             if (value.members?.includes(plotid)) {
-                // console.log(`plot ${plotid} found in collection ${key}`);
+                    // console.log(`plot ${plotid} found in collection ${key}`);
                 found = true
                 break
             }
         }
         if (!found) {
             // console.log(`plot ${plotid} not found`);
-            plotsNotInCollections.push(plotid)
+            plotsNotInCollections.update((currentVal) => [...currentVal, plotid])
         }
     })
     // console.log(plotsNotInCollections);

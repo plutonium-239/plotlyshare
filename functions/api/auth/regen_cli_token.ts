@@ -10,10 +10,10 @@ export async function makeNewCLIToken(env: Env, uid: string) {
 
 export const onRequest: PagesFunction<Env> = async (context) => {
 
-    const decryptedjwt = await verifyAndDecodeJWT(context.request, context.env.ENCODE_JWT_TOKEN)
-    if (decryptedjwt instanceof Response) return decryptedjwt;
+    const decodedRes = await verifyAndDecodeJWT(context, context.env.ENCODE_JWT_TOKEN)
+    if (decodedRes instanceof Response) return decodedRes;
     
-    const cli_token = await makeNewCLIToken(context.env, decryptedjwt.user_id)
+    const cli_token = decodedRes.uid
 
     return new Response(
         JSON.stringify({

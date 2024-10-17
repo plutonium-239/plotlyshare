@@ -37,7 +37,7 @@
 </script>
 
 <main>
-    <section class="content md:h-screen">
+    <section class="content">
         <header id="header" class="sticky top-0 bg-base-100 max-h-24 transition-all duration-150 text-xl md:text-2xl">
             <a href="/" id="header_logo" class="inline-flex gap-4 items-center max-h-[inherit] relative">
                 <img class="justify-self-start max-h-[inherit]" src="/icons/icon-nobg.svg" alt="logo"/>
@@ -51,6 +51,11 @@
             <div class="flash">{{ message }}</div>
         {% endfor %} -->
         <Router {routes} />
+        <footer class="footer footer-center bg-base-300 text-base-content p-4">
+            <aside>
+                <p>PlotlyShare is not affiliated to Plotly in any way.</p>
+            </aside>
+        </footer>
     </section>
 </main>
 

@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [svelte()],
   resolve: {
     alias: {
-      "worker-auth-providers": path.resolve(__dirname, 'worker-auth-providers')
+      // "worker-auth-providers": path.resolve(__dirname, 'worker-auth-providers'),
+      "$icons": path.resolve(__dirname, 'src/lib/icons')
     }
   },
   appType: "mpa"

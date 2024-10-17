@@ -1,10 +1,10 @@
 <script lang="ts">
-    import SharedIcon from "../icons/shared.svg?raw";
-    import EyeHiddenIcon from "../icons/eye-hidden.svg?raw";
+    import SharedIcon from "$icons/shared.svg?raw";
+    import EyeHiddenIcon from "$icons/eye-hidden.svg?raw";
     import type { CollectionData } from "../../../functions/api/utils";
     import { collection, type PlotMetadata } from "../data";
-    import FolderIcon from '../icons/folder.svg?raw'
-    import PlotIcon from '../icons/icon-nobg.svg?raw'
+    import FolderIcon from '$icons/folder.svg?raw'
+    import PlotIcon from '$icons/icon-nobg.svg?raw'
 
     let makePublic = false;
     let name: string
@@ -17,10 +17,8 @@
 
     async function makeNewCollection() {
         if (!name) return
-        let collid = await fetch('https://uuid.rocks/short').then(res => res.text())
         let coll = {
             name: name,
-            id: collid,
             members: Object.entries(plotsToTake).filter((value) => value[1]).map((value) => value[0]),
             subcollections: Object.entries(collsToTake).filter((value) => value[1]).map((value) => value[0]),
             public: makePublic,

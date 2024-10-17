@@ -5,9 +5,9 @@ import { createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeREST
 import { onRequestGet as redirectRequest } from './redirect';
 
 
-function generateJWT(user: Google.CallbackResponse, env: Env) {
+function generateJWT(rid: string, env: Env) {
     const claims: any = {
-        user_id: user.user.id,
+        user_id: rid,
     };
     const secret = env.ENCODE_JWT_TOKEN;
     console.log("[claims, secret]", claims, secret);
@@ -154,7 +154,7 @@ export const onRequest : PagesFunction<Env> = async (context) => {
 
         await createUser(user, context.env, context);
 
-        const jwt = await generateJWT(user, context.env);
+        const jwt = await generateJWT(await hashThis(user.user.id), context.env);
         console.log("[jwt]", jwt);
         const expiry = new Date();
         expiry.setTime(expiry.getTime() + 24 * 3600 * 1000); // 1 day, 1000 refers to milliseconds

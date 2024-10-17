@@ -2,11 +2,12 @@
   import BreadCrumbs from './dashboard/BreadCrumbs.svelte';
 
     import type { UserData } from '../../functions/api/utils';
-    import { collections, collection, dashboardView, data, getDemoMetadata, loggedIn, savedCollections, savedData, updateDates, updatePlotsNotInCollections, rootCollections, plotsNotInCollections } from './data';
+    import { collections, collection, dashboardView, data, getDemoMetadata, loggedIn, savedCollections, savedData, updateDates, updatePlotsNotInCollections, rootCollections, plotsNotInCollections, type PlotMetadata, profile } from './data';
     import Grid from './dashboard/Grid.svelte';
     import Table from './dashboard/Table.svelte';
     import TableIcon from './icons/table.svg?raw';
     import FolderIcon from './icons/folder.svg?raw';
+    import TreeListIcon from './icons/list-tree.svg?raw';
     import PlotIcon from './icons/icon-nobg.svg?raw'
     import GridIcon from './icons/list-grid.svg?raw';
     import RefreshIcon from './icons/refresh.svg?raw';
@@ -21,11 +22,45 @@
     
     // const local_format = Intl.DateTimeFormat();
     let plotsFetching = false
+
+
+    // ! Sharing modal====================
+    let sharingModal: HTMLDialogElement;
+    let plotInSharing: {id: string, plot: PlotMetadata};
+    function sharingPlot(plotid: string) {
+        plotInSharing = { plot: $data.get(plotid)!, id: plotid }
+        sharingModal.showModal();
+    }
+    async function sharingPlotAPIrequest() {
+        if (!plotInSharing) return
+        await fetch(`/api/plot/${$profile.uid}/${plotInSharing.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({public: !plotInSharing.plot.public})
+        })
+        await fetcher()
+    }
+    // ! =================================
+    // ! Delete modal====================
+    async function deletePlot(plotid: string) {
+        if (confirm('Are you sure?')) {
+            let deleteRes = await fetch(`/api/plot/${$profile.uid}/${plotid}`, {method: 'DELETE'})
+            console.log({deleteRes});
+            await fetcher()
+        }
+    }
+    // ! =================================
+
     // updateDates($data)
     // console.log({location});
-    $: if (location) {console.log("location trigger"); fetcher()}
 
-    const fetcher = async () => {
+    // ! INIT
+    $collections = $savedCollections
+    $data = $savedData
+
+    async function fetcher() {
         if (plotsFetching) {console.log("early demise"); return}
         plotsFetching = true
         console.log("fetcher called");
@@ -43,25 +78,36 @@
             let res: UserData = await fetch('/api/plots').then(res => res.json())
             console.log('res')
             console.log(res);
-            if (res.plots && (Object.keys(res.plots).length !== $data.size)) {
+            // if (res.plots && (Object.keys(res.plots).length !== $data.size)) {
                 $savedData = new Map(Object.entries(res.plots))
                 console.log('$savedData udpated with res.plots');
                 // console.log($data);
-            } 
+            // } 
             // else if (Object.keys(res.plots).length === 0) {
             //     console.log("logged in but no plots")
             //     // if logged in user does not have any plots
             //     $data = new Map()
             // }
-            if (res.collections && (Object.keys(res.collections).length !== $collections.size)) {
+            // if (res.collections && (Object.keys(res.collections).length !== $collections.size)) {
                 $savedCollections = new Map(Object.entries(res.collections))
                 console.log({$savedCollections});
-            }
-            if (res.rootCollections && (Object.keys(res.rootCollections).length !== $rootCollections.length)) {
+            // }
+            // if (res.rootCollections && (Object.keys(res.rootCollections).length !== $rootCollections.length)) {
                 $rootCollections = res.rootCollections
                 console.log({$rootCollections});
-            }
+            // }
         }
+        locUpdater()
+        console.log("Ending fetcher");
+        console.log({$data, $collections, $collection, plotsNotInCollections});
+        
+        setTimeout(() => { plotsFetching = false }, 400)
+    }
+    loggedIn.subscribe(async () => {console.log("loggedin trigger"); fetcher();})
+
+    $: if (location) {console.log("location trigger"); locUpdater()}
+
+    function locUpdater() {
         if (location.length > 0) {
             // @ts-expect-error
             $collection = $savedCollections.get(location[location.length-1])!
@@ -77,19 +123,7 @@
         updatePlotsNotInCollections($data, $collections)
         $data = $data
         $collections = $collections
-        console.log("Ending fetcher");
-        console.log({$data, $collections, $collection, plotsNotInCollections});
-        
-        setTimeout(() => { plotsFetching = false }, 400)
     }
-    loggedIn.subscribe(async () => {console.log("loggedin trigger"); fetcher();})
-
-    // setInterval(() => {
-    //     $loggedIn = false
-    //     console.log("zamn zawg");        
-    //     $data.set("zamn", {name: "zamn", timestamp: 0, time_created:"2023-12-22T22:07:55+0530", linked_file: "/icon-nobg.svg", public: true})
-    //     $data = $data
-    // }, 5000)
 
 </script>
 
@@ -123,25 +157,34 @@
             {/if}
         </span>
         <div class="inline-flex">
-            <span class="tooltip tooltip-bottom" data-tip="Folder View">
-                <button on:click={() => {$dashboardView = "folder"}} class:btn-secondary={$dashboardView == 'folder'}
-                    class="btn btn-square h-10 w-10 min-h-8 p-2" 
-                >
-                    {@html FolderIcon}
-                </button>
-            </span>
+            <div class="join w-fit">
+                <span class="tooltip tooltip-bottom" data-tip="Folder View">
+                    <button on:click={() => {$dashboardView = "folder"}} class:btn-secondary={$dashboardView == 'folder'}
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
+                    >
+                        {@html FolderIcon}
+                    </button>
+                </span>
+                <span class="tooltip tooltip-bottom" data-tip="Tree View">
+                    <button on:click={() => {$dashboardView = "tree"}} class:btn-secondary={$dashboardView == 'tree'}
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
+                    >
+                        {@html TreeListIcon}
+                    </button>
+                </span>
+            </div>
             <div class="divider divider-horizontal mx-0"></div>
-            <div class="join w-fit max-md:right-0">
+            <div class="join w-fit">
                 <span class="tooltip tooltip-bottom" data-tip="Table View">
                     <button on:click={() => {$dashboardView = "table"}} class:btn-secondary={$dashboardView == 'table'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
                     >
                         {@html TableIcon}
                     </button>
                 </span>
                 <span class="tooltip tooltip-bottom" data-tip="Grid View">
                     <button on:click={() => {$dashboardView = "grid"}} class:btn-secondary={$dashboardView == 'grid'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item" 
+                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
                     >
                         {@html GridIcon}
                     </button>
@@ -155,14 +198,33 @@
     </div>
 
     {#if $dashboardView == 'table'}
-    <Table />
+    <Table {sharingPlot} {deletePlot} />
     {:else if $dashboardView == "grid"}
-    <Grid />
+    <Grid {sharingPlot} {deletePlot} />
     {:else if $dashboardView == "folder"}
-    <Folder />
+    <Folder sharing={sharingPlot} {deletePlot} />
     {/if}
-
 </div>
+
+<dialog bind:this={sharingModal} id="sharing_modal" class="modal">
+    {#if plotInSharing?.id}
+        <div class="modal-box flex flex-col items-center gap-4">
+            <h3 class="text-lg font-bold text-primary">{plotInSharing.plot.name}</h3>
+            <p>is visible to</p>
+            <h3 class="text-lg font-bold underline decoration-dotted text-secondary">
+                {plotInSharing.plot.public ? "anyone with the link" : "you"}
+            </h3>
+            <button class="btn btn-primary w-1/2" on:click={sharingPlotAPIrequest}>
+                Turn {plotInSharing.plot.public ? "off" : "on"} sharing
+            </button>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    {/if}
+</dialog>
+
+
 
 <style type="text/postcss">
     :root {

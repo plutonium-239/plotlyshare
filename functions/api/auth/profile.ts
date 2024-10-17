@@ -1,4 +1,4 @@
-import { verifyAndDecodeJWT, hashThis, type BasicProfileInKV, type Env } from '../utils';
+import { verifyAndDecodeJWT, type BasicProfileInKV, type Env } from '../utils';
 import { makeNewCLIToken } from './regen_cli_token';
 
 
@@ -7,19 +7,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // const app = initializeApp(FIREBASE_CONFIG(context.env))
     // const metadata = getFirestore(app)
 
-    const decryptedjwt = await verifyAndDecodeJWT(context.request, context.env.ENCODE_JWT_TOKEN)
-    if (decryptedjwt instanceof Response) return decryptedjwt;
+    const decodedRes = await verifyAndDecodeJWT(context, context.env.ENCODE_JWT_TOKEN)
+    if (decodedRes instanceof Response) return decodedRes;
 
-    console.log('decryptedjwt', JSON.stringify(decryptedjwt));
+    // console.log('decodedRes', JSON.stringify(decodedRes));
 
-    // const user = (await getDoc(doc(metadata, 'users', decryptedjwt.user_id))).data()
+    // const user = (await getDoc(doc(metadata, 'users', decodedRes.user_id))).data()
     
     /* {name: string, fields: {[s: string]: any}, createTime: string, updateTime: string} */
     // const userParsed: Google.UserResponse = await makeAPIfetch(
-        //     makeRESTdocURL(context.env, "users", decryptedjwt.user_id), 
+        //     makeRESTdocURL(context.env, "users", decodedRes.user_id), 
         //     context.env
         // )
-    const uid = await hashThis(decryptedjwt.user_id)
+    const uid = decodedRes.uid
     const profile = await context.env.basicprofileKV.get(uid)
     if (!profile) {
         return new Response(

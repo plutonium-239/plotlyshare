@@ -1,25 +1,19 @@
 <script lang="ts">
     import { forceDarkPlots, loggedIn, profile, type ProfileAPIResponse, type ProfileData } from './data';
     import ProfileIcon from './icons/profile-default.svg?raw'
-    import ChevronRightIcon from './icons/chevron-right.svg?raw'
     import MoonIcon from './icons/moon.svg?raw'
     import SunIcon from './icons/sun.svg?raw'
     import CopyIcon from './icons/copy.svg?raw'
     import EyeHiddenIcon from './icons/eye-hidden.svg?raw'
     import EyeVisibleIcon from './icons/eye-visible.svg?raw'
-    import migrationWorker from './migrationWorker?worker'
+    import Migration from './Migration.svelte';
     let profile_modal: HTMLDialogElement;
 
     // let profile: ProfileAPIResponse
-    let migrateCollapseOpen = false
-    let migrateFileChosen: FileList
-    let migrateOutput = ""
-    let migrateErrored = false
-    let migrateDownload: HTMLAnchorElement
     let cliTokenShown = false
-    let tokenRegenerated = false
+    let tokenRegenerated =
+     false
     
-    // let it be async, dont await
     let profilePromise = fetch('/api/auth/profile').then((res) => res.json()).then((data) => {
         $profile = data as ProfileAPIResponse;
         $loggedIn = true;
@@ -31,43 +25,6 @@
         console.log("NOT LOGGED IN");
     });
 
-    $: console.log('migration:', migrateFileChosen, migrateFileChosen?.length ?? "-1");
-
-    $: if (migrateFileChosen) metaMigrator()
-
-    const metaMigrator = () => {
-        migrateErrored = false
-        if (!migrateFileChosen || migrateFileChosen.length > 1) {
-            console.log(migrateFileChosen, migrateFileChosen.length);
-            
-            migrateOutput = "Please upload exactly 1 file"
-            migrateErrored = true
-            return
-        }
-        const zipFile = migrateFileChosen[0];
-        const worker = new migrationWorker()
-
-        worker.onmessage = ({data}) => {
-            migrateErrored = data.migrateErrored
-            migrateOutput = data.migrateOutput
-            if (!migrateErrored) {
-                if (data.newMeta) {
-                    console.log("RECEIVED NEW META");
-                    console.log(data.newMeta);
-                } else {
-                    console.log("RECEIVED ZIP DATA");
-                    console.log(data.convertedData);
-                    
-                    // let blob = new Blob([data.convertedData]);
-                    migrateDownload.href = URL.createObjectURL(data.convertedData);
-                    migrateDownload.download = `converted${migrateFileChosen[0].name.replace("zip", "")}.zip`;
-                    // migrateDownload.click();
-                }
-            }
-        }
-        
-        worker.postMessage(zipFile)        
-    }
     $: uid_token = `${$profile.uid}//${$profile.cli_token}`
 
     async function regenerateCLIToken() {
@@ -94,7 +51,7 @@
         </form>
         {#await profilePromise then }
         {#if $loggedIn}
-        <div class="w-48 h-48 m-5 relative flex items-center justify-center">
+        <div class="w-48 h-48 m-5 relative flex items-center justify-center aspect-square">
             <img class="z-10 absolute top-0 left-0 w-full blur-lg rounded-full" src={$profile.picture} aria-hidden="true" alt="blur backdrop" />
             <img class="z-20 rounded-full shadow-[black] shadow-lg" src={$profile.picture} alt="profile"/>
         </div>
@@ -204,37 +161,8 @@
 
         <div class="divider text-secondary">Migrate old plots</div>
         
-        <!-- MIGRATION -->
-        <div class="collapse bg-base-200">
-            <input type="checkbox" bind:checked={migrateCollapseOpen} />
-            <div class="collapse-title text-xl font-medium flex gap-4 items-center">
-                <div class="w-8 h-8 transition-transform duration-150" class:rotate-90={migrateCollapseOpen}>
-                        {@html ChevronRightIcon}
-                </div>
-                <p>Migrate from plotlyshare v1 (on deta.space)</p>
-            </div>
-            <div class="collapse-content flex flex-col items-center">
-                <div class="outline outline-1 outline-secondary text-secondary text-sm font-semibold w-fit rounded p-1 mb-4">
-                    Upload your <code>.zip</code> exported from space
-                    <!-- <button class="btn btn-primary">Upload</button> -->
-                </div>
-                <input type="file" accept=".zip" bind:files={migrateFileChosen} 
-                class="file-input file-input-bordered file-input-secondary file-input-lg w-full" />
-                <div class="text-base p-2 m-4 rounded {migrateErrored? "bg-error text-error-content": "bg-success text-success-content"}"
-                    class:hidden={!migrateOutput}
-                >
-                    {migrateOutput}
-                </div>
-                {#if migrateOutput && !migrateErrored}
-                {#if $loggedIn}
-                    <button class="btn btn-success">Upload</button>
-                {:else}
-                    <div class="p-2 m-4 rounded bg-error text-error-content">You must be logged in to upload your old plots.</div>
-                {/if}
-                    <a class="btn btn-success" href="" bind:this={migrateDownload}>Download converted data as .zip</a>
-                {/if}
-            </div>
-        </div>        
+        <!-- ! MIGRATION -->
+        <Migration />
 
     
     </div>

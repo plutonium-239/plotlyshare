@@ -28,6 +28,7 @@
   "dependencies": {
     "@aws-sdk/client-sns": "^3.658.1",
     "@tsndr/cloudflare-worker-jwt": "^2.5.4",
+    "cheerio": "^1.0.0",
     "dom-parser": "^1.1.5",
     "fflate": "^0.8.2",
     "firebase": "^10.13.2",

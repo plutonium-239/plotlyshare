@@ -1,14 +1,14 @@
-import { hashThis, makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, type Env, type UserData } from "./utils";
+import { makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, type Env, type UserData } from "./utils";
 
 
 export const onRequest: PagesFunction<Env> = async (context) => {
 
-    const decryptedjwt = await verifyAndDecodeJWT(context.request, context.env.ENCODE_JWT_TOKEN)
-    if (decryptedjwt instanceof Response) return decryptedjwt;
-    const uid = await hashThis(decryptedjwt.user_id)
+    const decodedRes = await verifyAndDecodeJWT(context, context.env.ENCODE_JWT_TOKEN)
+    if (decodedRes instanceof Response) return decodedRes;
+    const uid = decodedRes.uid
 
-    console.log("env is");
-    console.log(context.env);
+    // console.log("env is");
+    // console.log(context.env);
 
     const plotDataPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid, 'plots'), context)
     const collectionsPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid, 'collections'), context)
@@ -26,7 +26,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         rootCollections: profile.rootCollections
     }
 
-    console.log("userData", userData);
+    // console.log("userData", userData);
 
     // TODO: Return correct stuff
     return new Response(

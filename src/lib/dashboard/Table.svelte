@@ -1,8 +1,12 @@
 <script lang="ts">
-    import { data, dates, profile, type PlotMetadata } from '../data';
-    import DeleteIcon from '../icons/delete.svg?raw'
+    import { data, dates, profile } from '../data';
     import LinkIcon from '../icons/link.svg?raw'
+    import DeletePlot from './common/DeletePlot.svelte';
+    import SharePlot from './common/SharePlot.svelte';
 
+    export let sharingPlot: (plotid: string) => void
+    export let deletePlot: (plotid: string) => void
+    
 </script>
 
 <table class="table table-zebra table-xs md:table-lg sortable">
@@ -12,6 +16,7 @@
             <th class="no-sort text-center">Link</th>
             <th class="max-xl:hidden">ID</th>
             <th class="th-time">Time Created</th>
+            <th class="text-center">Sharing</th>
             <th class="no-sort text-center">Delete</th>
         </tr>
     </thead>
@@ -36,16 +41,26 @@
                         {@html LinkIcon}
                     </a> 
                 </td>
-                <td class='max-xl:hidden'>{ key }</td>
+                <td class='max-xl:hidden'>
+                    <span class="tooltip tooltip-accent" data-tip={key}>
+                        <div class="max-w-32 overflow-hidden overflow-ellipsis">
+                            { key }
+                        </div>
+                    </span>
+                </td>
                 <td class='date-formattable max-md:w-12'>
                     <span class="col-hide-small">{ dates.get(key)?.long_time }</span>
                     <span class="block md:hidden">{ dates.get(key)?.short_time }</span>
                 </td>
                 <td class="text-center">
+                    <SharePlot {key} visible={item.public} {sharingPlot} />
+                </td>
+                <td class="text-center">
+                    <DeletePlot {key} {deletePlot} />
                     <!-- <form action="{{ url_for('delete_plot', key=item, confirm='yes') }}" method="post"> -->
-                        <button type="submit" class="btn btn-outline btn-error btn-square btn-sm custom-btn" on:click={() => confirm('Are you sure?')}>
+                        <!-- <button type="submit" class="btn btn-outline btn-error btn-square btn-sm custom-btn" on:click={() => deletePlot(key)}>
                             {@html DeleteIcon}
-                        </button>
+                        </button> -->
                     <!-- </form> -->
                 </td>
             </tr>
@@ -65,5 +80,16 @@
     :global(td > .btn) {
         @apply max-md:w-12 max-md:h-12;
     }
+    /* .custom-tooltip {
+        @apply relative inline-block;
+    }
+    .custom-tooltip::before {
+        @apply bg-accent text-accent-content absolute bottom-6 left-1/2 opacity-0 transition-opacity duration-200;
+        transform: translateX(-50%);
+        content: attr(data-tip);
+    }
+    .custom-tooltip:hover:before {
+        @apply opacity-100;
+    } */
 </style>
 

@@ -1,11 +1,10 @@
-import type { PlotlyDataLayoutConfig } from "plotly.js-dist-min";
-import { BasicProfileInKV, PlotData, createFirestoreDocument, drivePutMeta, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, verifyCLIToken, type Env } from "./utils";
+import { BasicProfileInKV, PlotData, createFirestoreDocument, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, verifyCLIToken, type Env } from "./utils";
 import { OAuthTokens, google } from "../worker-auth-providers/dist";
 
 export type PlotFormData = {
-    plot_data: PlotlyDataLayoutConfig,
+    plot_data: string,
     name: string,
-    timestamp: number,
+    timestamp: string,
     time: string
 }
 
@@ -23,7 +22,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     //     console.log(`${key}: ${value}`);
     // }
 
-    const plot = Object.fromEntries(data.entries())
+    // @ts-expect-error
+    const plot: PlotFormData = Object.fromEntries(data.entries())
 
     
     // console.log("parsed plot:");
@@ -58,9 +58,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         mimeType: 'application/json'
     }
     
-    console.log(typeof plot.plot_data);
+    // console.log(typeof plot.plot_data);
     const opts = {fields: 'id', uploadType: 'multipart'}
-    const uploadRes = await drivePutMultipart(fileMetadata, plot.plot_data as string, accessToken.access_token, opts) as {id:string}
+    const uploadRes = await drivePutMultipart(fileMetadata, plot.plot_data, accessToken.access_token, opts) as {id:string}
     console.log("Upload response");
     console.log(uploadRes);
     let t2 = performance.now()
@@ -68,9 +68,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const plotlyshareMetadata: PlotData = {
         public: false,
-        name: plot.name as string,
-        time_created: plot.time as string,
-        timestamp: parseInt(plot.timestamp as string),
+        name: plot.name,
+        time_created: plot.time,
+        timestamp: parseInt(plot.timestamp),
         linked_file: `drive/${uploadRes.id}`
     }
     console.log("Plot metadata", plotlyshareMetadata);
@@ -90,7 +90,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     return new Response(
         JSON.stringify({
             key: `${uid}/${plotID}`,
-            sent_bytes: (plot.plot_data as string).length
+            sent_bytes: (plot.plot_data).length
         }),
         {
             status: 200,
