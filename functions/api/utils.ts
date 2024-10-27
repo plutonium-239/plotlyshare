@@ -143,36 +143,41 @@ export type FirestoreField = {
 };
 export type DocumentFields = { [s: string]: any }
 
+
+export function coreCoverterFromDoc(field: FirestoreField) {
+    if (field.stringValue !== undefined) {
+        return field.stringValue;
+    } else if (field.integerValue !== undefined) {
+        return field.integerValue;
+    } else if (field.booleanValue !== undefined) {
+        return field.booleanValue;
+    } else if (field.timestampValue !== undefined) {
+        return new Date(field.timestampValue);
+    } else if (field.arrayValue !== undefined) {
+        console.log('array field', field);
+        console.log('array field values', field.arrayValue);
+        return field.arrayValue.values?.map((z) => coreCoverterFromDoc(z)) ?? []
+    } else if (field.mapValue !== undefined) {
+        return convertFirestoreData(field.mapValue);
+    } else {
+        throw new Error(`Unsupported data type: ${typeof field}`);
+    }
+}
+
 export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
     const convertedData: DocumentFields = {};
     for (const key in data.fields) {
-        const field = data.fields[key];
-        if (field.stringValue !== undefined) {
-            convertedData[key] = field.stringValue;
-        } else if (field.integerValue !== undefined) {
-            convertedData[key] = parseInt(field.integerValue, 10);
-        } else if (field.booleanValue !== undefined) {
-            convertedData[key] = field.booleanValue;
-        } else if (field.timestampValue !== undefined) {
-            convertedData[key] = new Date(field.timestampValue);
-        } else if (field.arrayValue !== undefined) {
-            // console.log('array field values', field.arrayValue);
-            convertedData[key] = convertFirestoreArray(field.arrayValue);
-        } else if (field.mapValue !== undefined) {
-            convertedData[key] = convertFirestoreData(field.mapValue);
-        } else {
-            convertedData[key] = null;
-        }
+        convertedData[key] = coreCoverterFromDoc(data.fields[key]);
     }
     return convertedData;
 }
 
-function convertFirestoreArray(array: { values?: FirestoreField[] }): any[] {
-    if (!array.values) return []
-    const javascriptIsTheWorstChoice = Object.fromEntries(Object.entries(array.values))
-    const out = convertFirestoreData({ fields: javascriptIsTheWorstChoice })
-    return Object.values(out)
-}
+// function convertFirestoreArray(array: { values?: FirestoreField[] }): any[] {
+//     if (!array.values) return []
+//     const javascriptIsTheWorstChoice = Object.fromEntries(Object.entries(array.values))
+//     const out = convertFirestoreData({ fields: javascriptIsTheWorstChoice })
+//     return Object.values(out)
+// }
 
 
 let accessToken: string
@@ -228,7 +233,7 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
     return resultParsed
 }
 
-function coreConverter(value: any): {[key: string]: any} {
+function coreConverterToDoc(value: any): {[key: string]: any} {
     if (typeof value === 'string') {
         return { stringValue: value };
     } else if (typeof value === 'number') {
@@ -238,7 +243,7 @@ function coreConverter(value: any): {[key: string]: any} {
     } else if (value instanceof Date) {
         return { timestampValue: value.toISOString() };
     } else if (Array.isArray(value)) {
-        const out = value.map((z) => coreConverter(z));
+        const out = value.map((z) => coreConverterToDoc(z));
         return { arrayValue: { values: out } };
     } else if (typeof value === 'object' && value !== null) {
         return { mapValue: { fields: createFirestoreDocument(value) } };
@@ -251,7 +256,7 @@ export function createFirestoreDocument(data: DocumentFields) {
 
     for (const key in data) {
         const value = data[key];
-        fields[key] = coreConverter(value);
+        fields[key] = coreConverterToDoc(value);
     }
     return { fields };
 }

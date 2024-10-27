@@ -57,8 +57,8 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
         user_gid: user.user.id,
         driveFolderId: driveFolderId.id,
     }
-    const existingStats = JSON.parse(await env.basicprofileKV.get('__stats')) as Stats
-    existingStats.users += 1
+    const existingStats = JSON.parse(await env.basicprofileKV.get('__stats')) ?? {} as Stats
+    existingStats.users = (existingStats.users ?? 0) + 1
     const promiseStatsKV = env.basicprofileKV.put('__stats', JSON.stringify(existingStats))
 
     const promiseRTKV = env.basicprofileKV.put(rid, JSON.stringify(basicProfileForKV))
