@@ -1,7 +1,7 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import { google, type OAuthTokens } from "../../../worker-auth-providers";
 import type { Google } from '../../../worker-auth-providers/dist/providers/google';
-import { createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
+import { Stats, createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
 import { onRequestGet as redirectRequest } from './redirect';
 
 
@@ -22,18 +22,7 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
     // console.log("existing", existing);
     
     if (existing) {
-        let info: any
-        // try {
-            info = JSON.parse(existing) as BasicProfileInKV
-        // } catch {
-        //     console.error("Could not parse JSON :", existing);
-        //     info = {
-        //         email: user.user.email,
-        //         given_name: user.user.given_name,
-        //         picture: user.user.picture,
-        //         refresh_token: user.tokens.refresh_token
-        //     }
-        // }
+        let info = JSON.parse(existing) as BasicProfileInKV
         console.log("Found user with refresh_token", info);
         if (user.tokens.refresh_token) {
             console.log("Updated refresh token", user.tokens.refresh_token);
@@ -68,6 +57,10 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
         user_gid: user.user.id,
         driveFolderId: driveFolderId.id,
     }
+    const existingStats = JSON.parse(await env.basicprofileKV.get('__stats')) as Stats
+    existingStats.users += 1
+    const promiseStatsKV = env.basicprofileKV.put('__stats', JSON.stringify(existingStats))
+
     const promiseRTKV = env.basicprofileKV.put(rid, JSON.stringify(basicProfileForKV))
     const promiseFIRE = makeAPIfetch(
         makeRESTdocURL(env, `users?documentId=${user.user.id}`),
@@ -88,8 +81,7 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
         }
     )
 
-    return Promise.all([promiseRTKV, promiseFIRE, promiseFIRErootColl])
-    // await setDoc(doc(metadata, 'userdata', rid), )
+    return Promise.all([promiseStatsKV, promiseRTKV, promiseFIRE, promiseFIRErootColl])
 }
 
 export const FIREBASE_CONFIG = (env: Env) => {

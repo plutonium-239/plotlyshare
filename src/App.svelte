@@ -9,9 +9,12 @@
     import  { location } from 'svelte-spa-router';
     import { plotTitle } from "./lib/data";
     import Landing from "./lib/Landing.svelte";
+    import {Toasts} from 'svoast';
+    import About from "./lib/About.svelte";
 
     const routes = {
         '/': Landing,
+        '/about': About,
         '/dash/*': Dashboard,
         '/plot/:uid/:plotid': Plot,
         '*': Page404,
@@ -36,6 +39,11 @@
     
 </script>
 
+<!-- <svelte:head>
+    
+</svelte:head> -->
+
+<Toasts position='top-right' />
 <main>
     <section class="content">
         <header id="header" class="sticky top-0 bg-base-100 max-h-24 transition-all duration-150 text-xl md:text-2xl">
@@ -47,15 +55,14 @@
         	<h1 class="text-center font-bold text-accent absolute left-1/2 -translate-x-1/2">{ title }</h1>
             <Profile />
         </header>
-        <!-- {% for message in get_flashed_messages() %}
-            <div class="flash">{{ message }}</div>
-        {% endfor %} -->
         <Router {routes} />
-        <footer class="footer footer-center bg-base-300 text-base-content p-4">
-            <aside>
-                <p>PlotlyShare is not affiliated to Plotly in any way.</p>
-            </aside>
-        </footer>
+        {#if !$location.startsWith('/plot/')}
+            <footer class="footer footer-center bg-base-300 text-base-content p-4">
+                <aside>
+                    <p>PlotlyShare is not affiliated to Plotly in any way.</p>
+                </aside>
+            </footer>
+        {/if}
     </section>
 </main>
 

@@ -60,6 +60,11 @@ export type UserData = {
     }
 }
 
+export type Stats = {
+    users: number,
+    plots: number,
+}
+
 type DecryptedJWT = {
     exp: string,
     iat: string,

@@ -7,7 +7,7 @@ html {
 }
 
 body {
-	font-family: Orbit;
+	font-family: var(--selected-font, 'Cascadia Mono');
 }
 
 .col-hide-small {
@@ -20,4 +20,19 @@ body {
 
 .js-plotly-plot .plotly .modebar-btn {
 	@apply inline-block
+}
+
+:root {
+	--svoast-bg: oklch(var(--b3) / 0.8);
+	/* --svoast-text: oklch(var(--b3c) / 1); */
+	--svoast-info-colour: oklch(var(--in) / 1);
+	--svoast-attention-colour: oklch(var(--a) / 1);
+	--svoast-success-colour: oklch(var(--su) / 1);
+	--svoast-warning-colour: oklch(var(--wa) / 1);
+	--svoast-error-colour: oklch(var(--er) / 1);
+}
+
+::selection {
+	background-color: oklch(var(--a));
+	color: oklch(var(--ac));
 }

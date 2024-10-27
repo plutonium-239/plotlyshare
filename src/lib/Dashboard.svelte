@@ -1,4 +1,6 @@
 <script lang="ts">
+  import SelectList from './SelectList.svelte';
+
   import BreadCrumbs from './dashboard/BreadCrumbs.svelte';
 
     import type { UserData } from '../../functions/api/utils';
@@ -12,6 +14,8 @@
     import GridIcon from './icons/list-grid.svg?raw';
     import RefreshIcon from './icons/refresh.svg?raw';
     import Folder from './dashboard/Folder.svelte';
+    import { toast } from 'svoast';
+    import FolderCard from './dashboard/FolderCard.svelte';
 
     export let params: any;
     // because we need it computed before everything else as well as reactively
@@ -26,6 +30,7 @@
 
     // ! Sharing modal====================
     let sharingModal: HTMLDialogElement;
+    let sharingModalCloseButton: HTMLButtonElement;
     let plotInSharing: {id: string, plot: PlotMetadata};
     function sharingPlot(plotid: string) {
         plotInSharing = { plot: $data.get(plotid)!, id: plotid }
@@ -40,6 +45,7 @@
             },
             body: JSON.stringify({public: !plotInSharing.plot.public})
         })
+        sharingModalCloseButton.click();
         await fetcher()
     }
     // ! =================================
@@ -60,7 +66,7 @@
     $collections = $savedCollections
     $data = $savedData
 
-    async function fetcher() {
+    async function fetcher_sub() {
         if (plotsFetching) {console.log("early demise"); return}
         plotsFetching = true
         console.log("fetcher called");
@@ -103,6 +109,14 @@
         
         setTimeout(() => { plotsFetching = false }, 400)
     }
+    async function fetcher() {
+		toast.promise(fetcher_sub(), {
+			loading: 'Fetching 🍋fresh🍎 data',
+			success: 'Got the latest data',
+			error: 'Something went wrong :(',
+	    })
+    }
+
     loggedIn.subscribe(async () => {console.log("loggedin trigger"); fetcher();})
 
     $: if (location) {console.log("location trigger"); locUpdater()}
@@ -131,14 +145,14 @@
     <!-- REVIEW: NOT NEEDED? -->
     <!-- <link rel="stylesheet" href="/dashonly.css"/> -->
 </svelte:head>
-<div class="md:px-24 xl:px-36 py-8 max-md:px-4 md:flex flex-col justify-center min-w-[100vw] w-fit">
+<div class="md:px-24 xl:px-36 py-8 max-md:px-4 md:flex flex-col justify-center min-w-[100vw] w-fit [animation-duration:1s]" class:skeleton={plotsFetching}>
 
     <div class="mb-2 w-full flex items-center">
         <span class="tooltip tooltip-bottom" data-tip="Refresh Plots">
             <button on:click={fetcher} 
             class="btn btn-square btn-accent btn-outline btn-circle h-10 w-10 min-h-8 p-2"
             >
-                <span class="animate-spin anim-paused w-full h-full [animation-duration:0.4s]" class:anim-paused={!plotsFetching}>
+                <span class="animate-spin anim-paused w-full h-full [animation-duration:1s]" class:anim-paused={!plotsFetching}>
                     {@html RefreshIcon}
                 </span>
             </button>
@@ -158,37 +172,13 @@
         </span>
         <div class="inline-flex">
             <div class="join w-fit">
-                <span class="tooltip tooltip-bottom" data-tip="Folder View">
-                    <button on:click={() => {$dashboardView = "folder"}} class:btn-secondary={$dashboardView == 'folder'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
-                    >
-                        {@html FolderIcon}
-                    </button>
-                </span>
-                <span class="tooltip tooltip-bottom" data-tip="Tree View">
-                    <button on:click={() => {$dashboardView = "tree"}} class:btn-secondary={$dashboardView == 'tree'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
-                    >
-                        {@html TreeListIcon}
-                    </button>
-                </span>
+                <SelectList decision={dashboardView} value="folder" icon={FolderIcon} tooltip="Folder View" />
+                <SelectList decision={dashboardView} value="tree" icon={TreeListIcon} tooltip="Tree View" />
             </div>
             <div class="divider divider-horizontal mx-0"></div>
             <div class="join w-fit">
-                <span class="tooltip tooltip-bottom" data-tip="Table View">
-                    <button on:click={() => {$dashboardView = "table"}} class:btn-secondary={$dashboardView == 'table'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
-                    >
-                        {@html TableIcon}
-                    </button>
-                </span>
-                <span class="tooltip tooltip-bottom" data-tip="Grid View">
-                    <button on:click={() => {$dashboardView = "grid"}} class:btn-secondary={$dashboardView == 'grid'}
-                        class="btn btn-square h-10 w-10 min-h-8 p-2 join-item"
-                    >
-                        {@html GridIcon}
-                    </button>
-                </span>
+                <SelectList decision={dashboardView} value="table" icon={TableIcon} tooltip="Table View" />
+                <SelectList decision={dashboardView} value="grid" icon={GridIcon} tooltip="Grid View" />
             </div>
         </div>
 
@@ -219,7 +209,7 @@
             </button>
         </div>
         <form method="dialog" class="modal-backdrop">
-            <button>close</button>
+            <button bind:this={sharingModalCloseButton}>close</button>
         </form>
     {/if}
 </dialog>

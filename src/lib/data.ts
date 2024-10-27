@@ -196,3 +196,10 @@ export function updatePlotsNotInCollections(data: Map<string, PlotMetadata>, col
     // console.log(plotsNotInCollections);
     
 }
+
+type fonts = 'Cascadia Mono' | 'Overpass Mono' | 'Orbit' | 'Chakra Petch' | 'Readex Pro' 
+export let selectedFont: Writable<fonts> = persisted('selectedFont', 'Cascadia Mono');
+
+selectedFont.subscribe((font) => {
+    document.documentElement.style.setProperty('--selected-font', font);
+})

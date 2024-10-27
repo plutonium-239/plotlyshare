@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { forceDarkPlots, loggedIn, profile, type ProfileAPIResponse, type ProfileData } from './data';
+    import { forceDarkPlots, loggedIn, profile, type ProfileAPIResponse, selectedFont } from './data';
     import ProfileIcon from './icons/profile-default.svg?raw'
     import MoonIcon from './icons/moon.svg?raw'
     import SunIcon from './icons/sun.svg?raw'
@@ -7,23 +7,36 @@
     import EyeHiddenIcon from './icons/eye-hidden.svg?raw'
     import EyeVisibleIcon from './icons/eye-visible.svg?raw'
     import Migration from './Migration.svelte';
+    import { toast } from 'svoast';
+    import SelectList from './SelectList.svelte';
     let profile_modal: HTMLDialogElement;
 
     // let profile: ProfileAPIResponse
     let cliTokenShown = false
-    let tokenRegenerated =
-     false
+    let tokenRegenerated = false
     
-    let profilePromise = fetch('/api/auth/profile').then((res) => res.json()).then((data) => {
-        $profile = data as ProfileAPIResponse;
-        $loggedIn = true;
-        console.log("LOGGED IN");
-        console.log($profile);
-    }).catch(() => {
-        $loggedIn = false;
-        $profile = {uid: 'demo_plots'} as ProfileAPIResponse
-        console.log("NOT LOGGED IN");
-    });
+    
+    async function logIn() {
+        try {
+            let data = await fetch('/api/auth/profile').then((res) => res.json())
+            $profile = data as ProfileAPIResponse;
+            $loggedIn = true;
+            console.log("LOGGED IN");
+            console.log($profile);
+        } catch (e) {
+            $loggedIn = false;
+            $profile = {uid: 'demo_plots'} as ProfileAPIResponse
+            console.log("NOT LOGGED IN");
+        }
+    }
+    async function logInToast() {
+		return toast.promise(logIn(), {
+			loading: 'Logging in...',
+			success: 'Logged in',
+			error: 'Your session has expired, please log in again.'
+		});
+	}
+    logInToast()
 
     $: uid_token = `${$profile.uid}//${$profile.cli_token}`
 
@@ -38,7 +51,6 @@
             })
         }
     }
-
 </script>
 
 <button on:click={() => profile_modal.showModal()} class="btn btn-circle btn-accent w-12">
@@ -49,7 +61,7 @@
         <form method="dialog">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        {#await profilePromise then }
+        <!-- {#await logInToast then } -->
         {#if $loggedIn}
         <div class="w-48 h-48 m-5 relative flex items-center justify-center aspect-square">
             <img class="z-10 absolute top-0 left-0 w-full blur-lg rounded-full" src={$profile.picture} aria-hidden="true" alt="blur backdrop" />
@@ -141,12 +153,12 @@
         </div> -->
         
         {/if}
-        {/await}
+        <!-- {/await} -->
         
         <div class="divider text-accent">Preferences</div>
 
         <div class="form-control">
-            <label class="cursor-pointer label gap-4">
+            <label class="cursor-pointer label gap-4 bg-base-200 hover:bg-base-300 rounded-xl px-4 transition-colors duration-150">
                 <span class="text-base">Force Dark Mode on Plots</span>
                 <!-- <input type="checkbox" checked="checked" class="checkbox checkbox-accent" /> -->
                 <label class="swap swap-flip">
@@ -159,6 +171,33 @@
                     </span>
                 </label>
             </label>
+
+            <!-- <label class="label"> -->
+            <div class="label pt-6 px-4 bg-base-200 rounded-xl mt-4">
+                <span class="text-base">Font</span>
+                <div class="join relative">
+                    <SelectList decision={selectedFont} value="Cascadia Mono" tooltip="Cascadia Mono" classes="!p-1 [font-family:Cascadia_Mono]">
+                        <span slot="icon" class="text-xl">Ab</span>
+                    </SelectList>
+                    <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Monospace</div>
+                    <SelectList decision={selectedFont} value="Overpass Mono" tooltip="Overpass Mono" classes="!p-1 [font-family:Overpass_Mono]">
+                        <span slot="icon" class="text-xl">Ab</span>
+                    </SelectList>
+                    <SelectList decision={selectedFont} value="Orbit" tooltip="Orbit" classes="!p-1 [font-family:Orbit] ">
+                        <span slot="icon" class="text-xl">Ab</span>
+                    </SelectList>
+                </div>
+                <div class="join relative">
+                    <SelectList decision={selectedFont} value="Chakra Petch" tooltip="Chakra Petch" classes="!p-1 [font-family:Chakra_Petch]">
+                        <span slot="icon" class="text-xl">Ab</span>
+                    </SelectList>
+                    <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Display</div>
+                    <SelectList decision={selectedFont} value="Readex Pro" tooltip="Readex Pro" classes="!p-1 [font-family:Readex_Pro]">
+                        <span slot="icon" class="text-xl">Ab</span>
+                    </SelectList>
+                </div>
+            </div>
+            <!-- </label> -->
         </div>
 
         <div class="divider text-secondary">Migrate old plots</div>

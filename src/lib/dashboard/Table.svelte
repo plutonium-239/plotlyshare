@@ -10,7 +10,7 @@
 </script>
 
 <table class="table table-zebra table-xs md:table-lg sortable">
-    <thead class="sticky top-16">
+    <thead class="sticky top-16 z-[1]">
         <tr class="bg-base-300 text-secondary md:text-lg">
             <th class="th-name">Name</th>
             <th class="no-sort text-center">Link</th>
@@ -49,8 +49,8 @@
                     </span>
                 </td>
                 <td class='date-formattable max-md:w-12'>
-                    <span class="col-hide-small">{ dates.get(key)?.long_time }</span>
-                    <span class="block md:hidden">{ dates.get(key)?.short_time }</span>
+                    <time datetime={item.time_created} class="col-hide-small">{ dates.get(key)?.long_time }</time>
+                    <time datetime={item.time_created} class="block md:hidden">{ dates.get(key)?.short_time }</time>
                 </td>
                 <td class="text-center">
                     <SharePlot {key} visible={item.public} {sharingPlot} />

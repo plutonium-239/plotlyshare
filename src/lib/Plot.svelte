@@ -5,8 +5,8 @@
     export let params: any;
     
     let plotContainer: HTMLDivElement
-    let plotID = params.plotid
-    let userID = params.uid
+    let plotID : string = params.plotid
+    let userID : string = params.uid
     let plotLoaded = false
     let plotjson: PlotFullData | undefined
     let plotlyDarkTemplate: any
@@ -18,10 +18,18 @@
     
     document.getElementById("header")!.classList.add('scrolled');
     
-    $: if (Plotly) {
+    // if (userID === 'demo_plots') {
+    //     plotID = plotID.slice(5)
+    //     console.log("demo plot detected, changed id to", plotID);
+    // }
+    
+    $: if (window.Plotly) {
         loadingProgress = "Plotting Plotly Plot 😙\nFetching data"
     }
     onMount(async () => {
+        // const Plotly = await import("https://cdn.plot.ly/plotly-2.25.2.min.js")
+        // console.log("plotly is");
+        // console.log(Plotly);
         await getDarkTemplate();
         let plotURL: string | undefined;
         let plotData: CachedPlot = {} as CachedPlot
@@ -31,7 +39,9 @@
             plotjson = plotData.plot_data
             plotLoaded = true
         } else if (!$loggedIn && $data.has(plotID)) {
+            console.log("Got demo plot");
             const plotinfo = $data.get(plotID)!
+            console.log(plotinfo);
             plotURL = plotinfo.linked_file
             plotData.name = plotinfo.name
             plotData.timestamp = plotinfo.timestamp
@@ -42,7 +52,7 @@
             console.log("entered fetcher with", plotURL);
             plotjson = await fetch(plotURL)
             .then((res) => {
-                console.log("received response from plot api");
+                console.log("received response from", plotURL);
                 plotData.name = res.headers.get('PlotlyShare-Plot-Name') ?? plotData.name ?? "No name found"
                 plotData.timestamp = parseInt(res.headers.get('PlotlyShare-Plot-Timestamp') ?? plotData.timestamp.toString() ?? "0")
                 return res.json()
@@ -53,16 +63,18 @@
                 // return Error("error fetching plot plotjson")
             }) as PlotFullData
             plotData.plot_data = plotjson
-            $cachedPlots.set(`${userID}/${plotID}`, plotData)
-            $cachedPlots = $cachedPlots
-            console.log("setting cachedPlots");
-            console.log($cachedPlots);
+            if (plotjson) {
+                $cachedPlots.set(`${userID}/${plotID}`, plotData)
+                $cachedPlots = $cachedPlots
+                console.log("setting cachedPlots");
+                console.log($cachedPlots);
+            }
         }
 
         if (plotjson) {
             // setContext(`title${plotID}`, plotData.name)
             $plotTitle = plotData.name
-            await Plotly.newPlot(
+            await window.Plotly.newPlot(
                 plotContainer, 
                 plotjson.data, 
                 plotjson.layout, 
@@ -70,7 +82,7 @@
             );
             console.log("config was");
             console.log(plotjson.config);            
-            Plotly.Plots.resize(plotContainer);
+            window.Plotly.Plots.resize(plotContainer);
             plotLoaded = true
             plotlyNormalTemplateFromPlot = structuredClone(plotjson.layout?.template)
             // console.log("original template");
@@ -85,14 +97,14 @@
             console.log("Enabling force dark mode");
             if (!plotlyDarkTemplate) await getDarkTemplate();
             // console.log(plotlyDarkTemplate);
-            return await Plotly.relayout(plotContainer, {
+            return await window.Plotly.relayout(plotContainer, {
                 template: plotlyDarkTemplate,
             })
             // TODO: check if plot is still not dark mode and alert message
         } else if (plotLoaded) {
             console.log("Enabling normal mode");
             // console.log(plotlyNormalTemplateFromPlot);
-            return await Plotly.relayout(plotContainer, {
+            return await window.Plotly.relayout(plotContainer, {
                 template: plotlyNormalTemplateFromPlot,
             })
         } 
@@ -103,10 +115,11 @@
 <svelte:head>
     <link rel="stylesheet" href="/plotonly.css" />
     <!-- REVIEW: update plotlyjs version manually or set to latest -->
-    <link rel="modulepreload" href="https://cdn.plot.ly/plotly-2.25.2.min.js"/>
+    <script fetchpriority="high" charset="utf-8" src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+
 </svelte:head>
 <div
-    class="w-full overflow-x-auto !h-[calc(100%-4em)]"
+    class="w-full overflow-x-auto !h-[calc(100vh-4em)]"
     id="plotContainer"
     bind:this={plotContainer}
 >
