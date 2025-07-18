@@ -74,6 +74,7 @@
         if (plotjson) {
             // setContext(`title${plotID}`, plotData.name)
             $plotTitle = plotData.name
+            await ensurePlotly();
             await window.Plotly.newPlot(
                 plotContainer, 
                 plotjson.data, 
@@ -93,6 +94,7 @@
     })
     $: updatePlot($forceDarkPlots, plotLoaded).then(() => {console.log("Force dark plots Done")})
     const updatePlot = async (forceDarkPlots: boolean, plotLoaded: boolean) => {
+        await ensurePlotly();
         if (forceDarkPlots && plotLoaded) {
             console.log("Enabling force dark mode");
             if (!plotlyDarkTemplate) await getDarkTemplate();
@@ -108,6 +110,16 @@
                 template: plotlyNormalTemplateFromPlot,
             })
         } 
+    }
+
+    let PlotlyjsLoaded = false
+    const ensurePlotly = async () => {
+        if (!PlotlyjsLoaded && !window.Plotly) {
+            await new Promise((resolve) => {
+                setTimeout(resolve, 500)
+            });
+            PlotlyjsLoaded = true;
+        }
     }
 
 </script>

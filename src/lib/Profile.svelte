@@ -18,19 +18,29 @@
     
     async function logIn() {
         try {
-            let data = await fetch('/api/auth/profile').then((res) => res.json())
-            $profile = data as ProfileAPIResponse;
-            $loggedIn = true;
-            console.log("LOGGED IN");
-            console.log($profile);
+            let data: ProfileAPIResponse | {error: string} 
+                = await fetch('/api/auth/profile').then((res) => res.json())
+            if ("error" in data) {
+                throw new Error(data.error)
+            } else {
+                $profile = data as ProfileAPIResponse;
+                $loggedIn = true;
+                console.log("LOGGED IN");
+                console.log($profile);
+            }
         } catch (e) {
             $loggedIn = false;
             $profile = {uid: 'demo_plots'} as ProfileAPIResponse
+            console.error(e);
             console.log("NOT LOGGED IN");
         }
     }
     async function logInToast() {
-		return toast.promise(logIn(), {
+		return toast.promise(new Promise(async (resolve, reject) => {
+            await logIn();
+            if ($loggedIn) resolve(null);
+            else reject();
+        }), {
 			loading: 'Logging in...',
 			success: 'Logged in',
 			error: 'Your session has expired, please log in again.'
@@ -53,8 +63,15 @@
     }
 </script>
 
-<button on:click={() => profile_modal.showModal()} class="btn btn-circle btn-accent w-12">
-    {@html ProfileIcon}
+<button on:click={() => profile_modal.showModal()} class={$loggedIn ? "w-12" : "btn btn-circle btn-accent w-12"}>
+    {#if $loggedIn}
+        <div class="w-12 h-12 relative flex items-center justify-center aspect-square">
+            <img class="z-10 absolute top-0 left-0 w-full blur-lg rounded-full" src={$profile.picture} aria-hidden="true" alt="blur backdrop" />
+            <img class="z-20 rounded-full shadow-[black] shadow-lg" src={$profile.picture} alt="profile"/>
+        </div>
+    {:else}
+        {@html ProfileIcon}
+    {/if}
 </button>
 <dialog bind:this={profile_modal} class="modal" id="profile_modal">
     <div class="modal-box flex flex-col items-center">
@@ -173,28 +190,35 @@
             </label>
 
             <!-- <label class="label"> -->
-            <div class="label pt-6 px-4 bg-base-200 rounded-xl mt-4">
-                <span class="text-base">Font</span>
-                <div class="join relative">
-                    <SelectList decision={selectedFont} value="Cascadia Mono" tooltip="Cascadia Mono" classes="!p-1 [font-family:Cascadia_Mono]">
-                        <span slot="icon" class="text-xl">Ab</span>
-                    </SelectList>
-                    <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Monospace</div>
-                    <SelectList decision={selectedFont} value="Overpass Mono" tooltip="Overpass Mono" classes="!p-1 [font-family:Overpass_Mono]">
-                        <span slot="icon" class="text-xl">Ab</span>
-                    </SelectList>
-                    <SelectList decision={selectedFont} value="Orbit" tooltip="Orbit" classes="!p-1 [font-family:Orbit] ">
-                        <span slot="icon" class="text-xl">Ab</span>
-                    </SelectList>
-                </div>
-                <div class="join relative">
-                    <SelectList decision={selectedFont} value="Chakra Petch" tooltip="Chakra Petch" classes="!p-1 [font-family:Chakra_Petch]">
-                        <span slot="icon" class="text-xl">Ab</span>
-                    </SelectList>
-                    <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Display</div>
-                    <SelectList decision={selectedFont} value="Readex Pro" tooltip="Readex Pro" classes="!p-1 [font-family:Readex_Pro]">
-                        <span slot="icon" class="text-xl">Ab</span>
-                    </SelectList>
+            <div class="label px-4 bg-base-200 rounded-xl mt-4">
+                <span class="text-base mr-4">Font</span>
+                <!-- grid-auto-flow: column;
+  grid-template-rows: 0fr 1fr;
+  justify-items: center; -->
+                <div class="grid gap-x-4 grid-flow-col [grid-template-rows:1fr_0fr] justify-items-center">
+                    <!-- <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Monospace</div> -->
+                    <div class="join bg-secondary/15 relative mt-1">
+                        <SelectList decision={selectedFont} value="Cascadia Mono" tooltip="Cascadia Mono" classes="!p-1 [font-family:Cascadia_Mono]">
+                            <span slot="icon" class="text-xl">Ab</span>
+                        </SelectList>
+                        <SelectList decision={selectedFont} value="Overpass Mono" tooltip="Overpass Mono" classes="!p-1 [font-family:Overpass_Mono]">
+                            <span slot="icon" class="text-xl">Ab</span>
+                        </SelectList>
+                        <SelectList decision={selectedFont} value="Orbit" tooltip="Orbit" classes="!p-1 [font-family:Orbit] ">
+                            <span slot="icon" class="text-xl">Ab</span>
+                        </SelectList>
+                    </div>
+                    <div class="text-sm">Monospace</div>
+                    <!-- <div class="text-sm absolute -top-6 left-1/2 [transform:translateX(-50%)]">Display</div> -->
+                    <div class="join bg-secondary/15 relative mt-1">
+                        <SelectList decision={selectedFont} value="Chakra Petch" tooltip="Chakra Petch" classes="!p-1 [font-family:Chakra_Petch]">
+                            <span slot="icon" class="text-xl">Ab</span>
+                        </SelectList>
+                        <SelectList decision={selectedFont} value="Readex Pro" tooltip="Readex Pro" classes="!p-1 [font-family:Readex_Pro]">
+                            <span slot="icon" class="text-xl">Ab</span>
+                        </SelectList>
+                    </div>
+                    <div class="text-sm">Display</div>
                 </div>
             </div>
             <!-- </label> -->

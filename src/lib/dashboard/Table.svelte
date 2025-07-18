@@ -49,8 +49,8 @@
                     </span>
                 </td>
                 <td class='date-formattable max-md:w-12'>
-                    <time datetime={item.time_created} class="col-hide-small">{ dates.get(key)?.long_time }</time>
-                    <time datetime={item.time_created} class="block md:hidden">{ dates.get(key)?.short_time }</time>
+                    <time datetime={item.time_created} class="time-hide-lg">{ dates.get(key)?.long_time }</time>
+                    <time datetime={item.time_created} class="block text-base lg:hidden">{ dates.get(key)?.short_time }</time>
                 </td>
                 <td class="text-center">
                     <SharePlot {key} visible={item.public} {sharingPlot} />

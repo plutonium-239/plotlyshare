@@ -15,7 +15,7 @@ type DashboardView = 'table' | 'grid' | 'folder' | 'tree'
 /**
  * The current view of the dashboard.
  */
-export const dashboardView = persisted('dashboardView', 'list' as DashboardView)
+export const dashboardView = persisted('dashboardView', 'table' as DashboardView)
 
 /**
  * Whether to force dark mode for plots.

@@ -10,8 +10,8 @@ body {
 	font-family: var(--selected-font, 'Cascadia Mono');
 }
 
-.col-hide-small {
-	@apply max-md:hidden overflow-hidden whitespace-nowrap text-ellipsis;
+.time-hide-lg {
+	@apply max-lg:hidden overflow-hidden whitespace-nowrap text-ellipsis;
 }
 
 /* .js-plotly-plot .plotly [data-title]::before, .js-plotly-plot .plotly [data-title]::after {
@@ -33,6 +33,6 @@ body {
 }
 
 ::selection {
-	background-color: oklch(var(--a));
+	background-color: #9381ff;
 	color: oklch(var(--ac));
 }

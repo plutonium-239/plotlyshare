@@ -157,7 +157,7 @@
                 </span>
             </button>
         </span>
-        <div class="w-24 max-md:w-0"></div>
+        <div class="w-[8.375rem] max-md:w-0"></div>
         <span class="px-4 ml-auto mr-auto flex gap-4">
             {#if plotsFetching}
             Fetching latest plots...

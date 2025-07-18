@@ -1,7 +1,7 @@
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import { google, type OAuthTokens } from "../../../worker-auth-providers";
 import type { Google } from '../../../worker-auth-providers/dist/providers/google';
-import { Stats, createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
+import { JWT_EXPIRY_TIME, Stats, createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
 import { onRequestGet as redirectRequest } from './redirect';
 
 
@@ -11,16 +11,16 @@ function generateJWT(rid: string, env: Env) {
     };
     const secret = env.ENCODE_JWT_TOKEN;
     console.log("[claims, secret]", claims, secret);
-    return jwt.sign({ exp: Math.floor(Date.now() / 1000) + 7 * 24 * 3600, ...claims}, secret, { algorithm: "HS256" });
+    return jwt.sign({ exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY_TIME, ...claims }, secret, { algorithm: "HS256" });
 }
 
 
-async function createUser(user: Google.CallbackResponse, env : Env, context: EventContext<Env, any, Record<string, unknown>>) {
+async function createUser(user: Google.CallbackResponse, env: Env, context: EventContext<Env, any, Record<string, unknown>>) {
     // const existing = await makeAPIfetch(makeRESTdocURL(env, 'users', `${user.user.id}`), env)
     const rid = await hashThis(user.user.id)
     const existing = await env.basicprofileKV.get(rid)
     // console.log("existing", existing);
-    
+
     if (existing) {
         let info = JSON.parse(existing) as BasicProfileInKV
         console.log("Found user with refresh_token", info);
@@ -38,12 +38,12 @@ async function createUser(user: Google.CallbackResponse, env : Env, context: Eve
             mimeType: 'application/vnd.google-apps.folder'
         },
         user.tokens.access_token,
-        {fields: 'id'}
-    ) as {id: string}
+        { fields: 'id' }
+    ) as { id: string }
     console.log("Made drive folder with id", driveFolderId);
-    
 
-	const profile : ProfileInFirestore = {
+
+    const profile: ProfileInFirestore = {
         provider: "google",
         uuid: rid,
         grantedScopes: user.tokens.scope,
@@ -95,7 +95,7 @@ export const FIREBASE_CONFIG = (env: Env) => {
     }
 };
 
-export const onRequest : PagesFunction<Env> = async (context) => {
+export const onRequest: PagesFunction<Env> = async (context) => {
     try {
         const options = {
             clientId: context.env.GOOGLE_CLIENT_ID,
@@ -106,17 +106,17 @@ export const onRequest : PagesFunction<Env> = async (context) => {
         // console.log('request', request);
         let existingState = await context.env.basicprofileKV.get('__state')
         if (!existingState) {
-            return new Response("Could not find state, please start again", {status: 502})
+            return new Response("Could not find state, please start again", { status: 502 })
         }
-        
+
         const params = new URLSearchParams(context.request.url.split('?').pop())
         // console.log(context.request.url);
         // console.log(params);
-        
-        let token : OAuthTokens | undefined
+
+        let token: OAuthTokens | undefined
         if (params.get('state') !== existingState) {
-            console.error(`state found: ${params.get('state')} should have been: ${existingState}`);   
-            return new Response("Bad state parameter", {status: 400})
+            console.error(`state found: ${params.get('state')} should have been: ${existingState}`);
+            return new Response("Bad state parameter", { status: 400 })
         }
         if (params.get('error')) {
             console.error("Google redirect returned error : ", params);
@@ -125,11 +125,12 @@ export const onRequest : PagesFunction<Env> = async (context) => {
                 console.info("can use code to get token");
                 console.log("code found", code);
                 token = await google.getTokensFromCode(code, options)
-                console.log("token", token);   
+                console.log("token", token);
             } else {
                 // this always returns at least an access token and a code
                 console.info("no code found, redirecting to google");
-                context.env.SHOULD_GOOGLE_PROMPT = "select_account"
+                // context.env.SHOULD_GOOGLE_PROMPT = "select_account consent"
+                context.env.SHOULD_GOOGLE_PROMPT = "consent"
                 return redirectRequest(context)
             }
         }
@@ -149,27 +150,21 @@ export const onRequest : PagesFunction<Env> = async (context) => {
         const jwt = await generateJWT(await hashThis(user.user.id), context.env);
         console.log("[jwt]", jwt);
         const expiry = new Date();
-        expiry.setTime(expiry.getTime() + 24 * 3600 * 1000); // 1 day, 1000 refers to milliseconds
-        return new Response(
-            JSON.stringify(user),
+        expiry.setTime(expiry.getTime() + JWT_EXPIRY_TIME * 1000); // 1000 refers to milliseconds
+        // expiry.setTime(expiry.getTime() + 10000); // 10 seconds
+        return Response.json(
+            user,
             {
                 status: 302,
                 headers: {
                     location: "/",
+                    // TODO: make file auth-utils.ts and add cookie/jwt code to that
                     "Set-Cookie": `__Session-worker.auth.providers-token=${jwt}; Secure; HttpOnly; SameSite=Lax; Expires=${expiry.toUTCString()}; path=/;`,
                 },
             }
         );
     } catch (e: any) {
         console.log("[error]", e?.stack);
-        return new Response(
-            null,
-            {
-                status: 302,
-                headers: {
-                    location: '/404'
-                }
-            }
-        );
+        return Response.redirect('/404', 302)
     }
 }

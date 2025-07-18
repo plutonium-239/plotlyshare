@@ -17,8 +17,8 @@
     <div class="card-body">
         <span class="card-title z-[5] text-primary">{item.name ?? "bruh moment"}</span>
         
-        <span class="col-hide-small">{ dates.get(key)?.long_time }</span>
-        <span class="block md:hidden">{ dates.get(key)?.short_time }</span>
+        <time datetime={item.time_created} class="time-hide-lg">{ dates.get(key)?.long_time }</time>
+        <time datetime={item.time_created} class="block text-base lg:hidden">{ dates.get(key)?.short_time }</time>
         
         <div class="mt-auto card-actions items-center justify-between">
             <SharePlot {key} visible={item.public} {sharingPlot} />

@@ -1,4 +1,5 @@
-import { verifyAndDecodeJWT, type BasicProfileInKV, type Env } from '../utils';
+import { google } from '../../worker-auth-providers';
+import { JWT_EXPIRY_TIME, verifyAndDecodeJWT, type BasicProfileInKV, type Env } from '../utils';
 import { makeNewCLIToken } from './regen_cli_token';
 
 
@@ -10,36 +11,50 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const decodedRes = await verifyAndDecodeJWT(context, context.env.ENCODE_JWT_TOKEN)
     if (decodedRes instanceof Response) return decodedRes;
 
+    if (Date.now() / 1000 - decodedRes.exp < JWT_EXPIRY_TIME) {
+        console.log("User (authd) JWT about to expire, trying to silent-auth and renew")
+        const refresh_token = decodedRes.basicProfile.refresh_token;
+        const options = {
+            clientId: context.env.GOOGLE_CLIENT_ID,
+            clientSecret: context.env.GOOGLE_CLIENT_SECRET,
+            redirectUrl: context.env.GOOGLE_REDIRECT_PROD_URL,
+            grantType: "refresh_token"
+        };
+        const token = await google.getTokensFromCode(refresh_token, options)
+        console.log(`re-auth success, [token]: ${token}`)
+
+    }
+
     // console.log('decodedRes', JSON.stringify(decodedRes));
 
     // const user = (await getDoc(doc(metadata, 'users', decodedRes.user_id))).data()
-    
+
     /* {name: string, fields: {[s: string]: any}, createTime: string, updateTime: string} */
     // const userParsed: Google.UserResponse = await makeAPIfetch(
-        //     makeRESTdocURL(context.env, "users", decodedRes.user_id), 
-        //     context.env
-        // )
+    //     makeRESTdocURL(context.env, "users", decodedRes.user_id), 
+    //     context.env
+    // )
     const uid = decodedRes.uid
-    const profile = await context.env.basicprofileKV.get(uid)
+    const profile = decodedRes.basicProfile
     if (!profile) {
-        return new Response(
-            "The credentials could not be verified, please log out and log in again.", 
+        return Response.json(
+            { error: "The credentials could not be verified, please log out and log in again." },
             { status: 401 }
         )
     }
-    const userParsed : BasicProfileInKV = JSON.parse(profile)
     let cli_token = await context.env.cli_tokensKV.get(uid)
     if (!cli_token) {
         cli_token = await makeNewCLIToken(context.env, uid)
     }
-    
-    return new Response(
-        JSON.stringify({
+    console.log(profile.refresh_token)
+
+    return Response.json(
+        {
             uid: uid,
-            name: userParsed.given_name,
-            picture: userParsed.picture,
+            name: profile.given_name,
+            picture: profile.picture,
             cli_token: cli_token
-        }),
+        },
         {
             status: 200,
             headers: {

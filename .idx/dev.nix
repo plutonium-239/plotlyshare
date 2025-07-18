@@ -7,6 +7,9 @@
   packages = [
     pkgs.nodejs_20
     pkgs.lazygit
+    # pkgs.blesh
+    pkgs.bat
+    pkgs.delta
   ];
   # Sets environment variables in the workspace
   env = {};

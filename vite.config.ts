@@ -11,5 +11,8 @@ export default defineConfig({
       "$icons": path.resolve(__dirname, 'src/lib/icons')
     }
   },
-  appType: "mpa"
+  appType: "mpa",
+  build: {
+    sourcemap: true
+  }
 })

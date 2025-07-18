@@ -2,6 +2,7 @@ import { getAccessToken } from "web-auth-library/google";
 import type { Google } from "../worker-auth-providers/dist/providers/google/types";
 import jwt from '@tsndr/cloudflare-worker-jwt';
 import queryString from "query-string";
+import { error } from "itty-router";
 
 export interface Env {
     GOOGLE_CLIENT_ID: string,
@@ -71,38 +72,42 @@ type DecryptedJWT = {
     user_id: string
 }
 
+export const JWT_EXPIRY_TIME = 7*24*3600
+
 export async function verifyAndDecodeJWT(
-    context: EventContext<Env, any, Record<string, unknown>>, 
+    context: EventContext<Env, any, Record<string, unknown>>,
     secret: string
-): Promise<Response | { uid: string; gid: any; }> {
+): Promise<Response | { uid: string, basicProfile: BasicProfileInKV, exp: number }> {
     const request = context.request
     const signedjwt = request.headers.get('Cookie')?.split('; ').
         find(c => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
 
     console.log('signedjwt', signedjwt);
+    // TODO split OR, handle each with different response
     if (!signedjwt || (! await jwt.verify(signedjwt, secret))) {
-        return new Response(
-            "The credentials could not be verified, please log out and log in again.",
+        return Response.json(
+            { error: "The credentials could not be verified, please log out and log in again." },
             { status: 401 }
         )
     }
     // @ts-expect-error
     let decryptedjwt = jwt.decode(signedjwt).payload! as DecryptedJWT
-    if (parseInt(decryptedjwt.exp) <= Date.now()/1000) {
-        return new Response(
-            "Your credentials have expired, please log in again.",
+    let exp = parseInt(decryptedjwt.exp)
+    if (exp <= Date.now() / 1000) {
+        return Response.json(
+            { error: "Your credentials have expired, please log in again." },
             { status: 401 }
         )
     }
     let uid = decryptedjwt.user_id
-    let gid = await context.env.basicprofileKV.get(uid)
-    if (!gid) {
-        return new Response(
-            "Unknown user.",
+    let basicProfile: BasicProfileInKV = JSON.parse(await context.env.basicprofileKV.get(uid))
+    if (!basicProfile) {
+        return Response.json(
+            { error: "Unknown user." },
             { status: 401 }
         )
     }
-    return {uid, gid}
+    return { uid, basicProfile, exp }
 }
 
 export async function verifyCLIToken(request: Request, env: Env) {
@@ -117,7 +122,7 @@ export async function verifyCLIToken(request: Request, env: Env) {
         }
         console.error("should have been", correct)
     }
-    return new Response('Unauthorized', { status: 401 });
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
 }
 
 const encoder = new TextEncoder()
@@ -183,9 +188,9 @@ export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
 let accessToken: string
 export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Record<string, unknown>>, extraHeaders?: RequestInit<CfProperties<unknown>>) {
     // console.log("making request to", url);
-    
+
     let t0 = performance.now()
-    
+
     if (!accessToken) {
         accessToken = await getAccessToken({
             credentials: ctx.env.GOOGLE_CLOUD_CREDENTIALS,
@@ -194,13 +199,13 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
         });
     }
     let t1 = performance.now()
-    console.log("getting app access_token took", t1-t0, "ms");
-    
+    console.log("getting app access_token took", t1 - t0, "ms");
+
     const result: { fields?: DocumentFields, documents?: [DocumentFields], error?: any } = await fetch(
         url, {
         headers: { Authorization: `Bearer ${accessToken}` },
         ...extraHeaders,
-        }
+    }
     )
         .then(res => res.json())
         .catch((err) => {
@@ -209,7 +214,7 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
             console.log(err.details);
         });
     let t2 = performance.now()
-    console.log("actual fetch took", t2-t1, "ms");
+    console.log("actual fetch took", t2 - t1, "ms");
 
     // console.log("result", result);
     if (result.error) {
@@ -224,16 +229,16 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
             resultParsed[(doc.name as string).split('/').pop()] = convertFirestoreData(doc)
         })
     } else if (result.fields) {
-        resultParsed = convertFirestoreData(result as {fields: DocumentFields})
+        resultParsed = convertFirestoreData(result as { fields: DocumentFields })
     }
     let t3 = performance.now()
-    console.log("parsing fetched data took", t3-t2, "ms");
+    console.log("parsing fetched data took", t3 - t2, "ms");
 
     // console.log("resultParsed", resultParsed);
     return resultParsed
 }
 
-function coreConverterToDoc(value: any): {[key: string]: any} {
+function coreConverterToDoc(value: any): { [key: string]: any } {
     if (typeof value === 'string') {
         return { stringValue: value };
     } else if (typeof value === 'number') {
@@ -300,7 +305,7 @@ export async function drivePutMultipart(fileMetadata: any, fileBody: string, acc
     //     'Content-Type: application/json\r\n\r\n' +
     //     `${fileBody}\r\n\r\n` +
     //     `--${boundary}--`;
-    const boundary='boundary'
+    const boundary = 'boundary'
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
     var multipartBody =
@@ -309,11 +314,11 @@ export async function drivePutMultipart(fileMetadata: any, fileBody: string, acc
         encodedMetadata +
         delimiter +
         'Content-Type: application/json\r\n\r\n' +
-        fileBody+'\r\n'+
+        fileBody + '\r\n' +
         close_delim;
 
     // console.log(multipartBody);
-    
+
 
     const urlparams = queryString.stringify(options)
     return fetch(`https://www.googleapis.com/upload/drive/v3/files?${urlparams}`, {
