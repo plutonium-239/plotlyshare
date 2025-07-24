@@ -149,7 +149,7 @@ export type FirestoreField = {
 export type DocumentFields = { [s: string]: any }
 
 
-export function coreCoverterFromDoc(field: FirestoreField) {
+export function coreConverterFromDoc(field: FirestoreField) {
     if (field.stringValue !== undefined) {
         return field.stringValue;
     } else if (field.integerValue !== undefined) {
@@ -159,9 +159,9 @@ export function coreCoverterFromDoc(field: FirestoreField) {
     } else if (field.timestampValue !== undefined) {
         return new Date(field.timestampValue);
     } else if (field.arrayValue !== undefined) {
-        console.log('array field', field);
-        console.log('array field values', field.arrayValue);
-        return field.arrayValue.values?.map((z) => coreCoverterFromDoc(z)) ?? []
+        // console.log('array field', field);
+        // console.log('array field values', field.arrayValue);
+        return field.arrayValue.values?.map((z) => coreConverterFromDoc(z)) ?? []
     } else if (field.mapValue !== undefined) {
         return convertFirestoreData(field.mapValue);
     } else {
@@ -172,7 +172,7 @@ export function coreCoverterFromDoc(field: FirestoreField) {
 export function convertFirestoreData(data: { [s: string]: FirestoreField }) {
     const convertedData: DocumentFields = {};
     for (const key in data.fields) {
-        convertedData[key] = coreCoverterFromDoc(data.fields[key]);
+        convertedData[key] = coreConverterFromDoc(data.fields[key]);
     }
     return convertedData;
 }
@@ -202,10 +202,11 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
     console.log("getting app access_token took", t1 - t0, "ms");
 
     const result: { fields?: DocumentFields, documents?: [DocumentFields], error?: any } = await fetch(
-        url, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        ...extraHeaders,
-    }
+        url, 
+        {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            ...extraHeaders,
+        }
     )
         .then(res => res.json())
         .catch((err) => {
@@ -218,7 +219,19 @@ export async function makeAPIfetch(url: string, ctx: EventContext<Env, any, Reco
 
     // console.log("result", result);
     if (result.error) {
-        if (Array.isArray(result.error.details)) console.error("detailed error (array)", result.error.details[0]);
+        if (Array.isArray(result.error.details)) {
+            console.error("detailed error (array)", result.error.details[0]);
+            if (result.error.details[0].reason === "ACCESS_TOKEN_EXPIRED") {
+                console.log("   Refreshing access token")
+                accessToken = await getAccessToken({
+                    credentials: ctx.env.GOOGLE_CLOUD_CREDENTIALS,
+                    scope: "https://www.googleapis.com/auth/datastore",
+                    waitUntil: ctx.waitUntil.bind(ctx),
+                });
+                // ! Recursive call, *hopefully* only once 
+                return makeAPIfetch(url, ctx, extraHeaders);
+            }
+        }
         if (result.error.details) console.error("error details", result.error.details);
         else console.error("error", result.error);
         return {}

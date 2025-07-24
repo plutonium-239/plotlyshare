@@ -1,8 +1,7 @@
 import { google } from '../../worker-auth-providers';
 import { JWT_EXPIRY_TIME, verifyAndDecodeJWT, type BasicProfileInKV, type Env } from '../utils';
 import { makeNewCLIToken } from './regen_cli_token';
-
-
+import { relativeTimeFromElapsed } from '../../../src/lib/timehelper'
 
 export const onRequest: PagesFunction<Env> = async (context) => {
     // const app = initializeApp(FIREBASE_CONFIG(context.env))
@@ -10,20 +9,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     const decodedRes = await verifyAndDecodeJWT(context, context.env.ENCODE_JWT_TOKEN)
     if (decodedRes instanceof Response) return decodedRes;
-
-    if (Date.now() / 1000 - decodedRes.exp < JWT_EXPIRY_TIME) {
-        console.log("User (authd) JWT about to expire, trying to silent-auth and renew")
-        const refresh_token = decodedRes.basicProfile.refresh_token;
-        const options = {
-            clientId: context.env.GOOGLE_CLIENT_ID,
-            clientSecret: context.env.GOOGLE_CLIENT_SECRET,
-            redirectUrl: context.env.GOOGLE_REDIRECT_PROD_URL,
-            grantType: "refresh_token"
-        };
-        const token = await google.getTokensFromCode(refresh_token, options)
-        console.log(`re-auth success, [token]: ${token}`)
-
-    }
 
     // console.log('decodedRes', JSON.stringify(decodedRes));
 
@@ -42,6 +27,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             { status: 401 }
         )
     }
+
+    const delta = decodedRes.exp * 1000 - Date.now();
+    console.log(`Provided jwt expires ${relativeTimeFromElapsed(delta)}`);
+
+    if (delta / 1000 < 24 * 3600) {
+        console.log(`   Trying to silent-auth and renew`)
+
+        const refresh_token = decodedRes.basicProfile.refresh_token;
+        const options = {
+            clientId: context.env.GOOGLE_CLIENT_ID,
+            clientSecret: context.env.GOOGLE_CLIENT_SECRET,
+            redirectUrl: context.env.GOOGLE_REDIRECT_PROD_URL,
+            grantType: "refresh_token"
+        };
+        // .then because dont need to wait here
+        const token = google.getTokensFromCode(refresh_token, options).then(() => {
+            console.log(`   re-auth success, [token]: ${token}`)
+        })
+
+    }
+
     let cli_token = await context.env.cli_tokensKV.get(uid)
     if (!cli_token) {
         cli_token = await makeNewCLIToken(context.env, uid)

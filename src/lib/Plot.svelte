@@ -127,7 +127,7 @@
 <svelte:head>
     <link rel="stylesheet" href="/plotonly.css" />
     <!-- REVIEW: update plotlyjs version manually or set to latest -->
-    <script fetchpriority="high" charset="utf-8" src="https://cdn.plot.ly/plotly-2.25.2.min.js"></script>
+    <script fetchpriority="high" charset="utf-8" src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
 
 </svelte:head>
 <div

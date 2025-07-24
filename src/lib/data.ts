@@ -2,6 +2,7 @@ import type { PlotlyDataLayoutConfig } from 'plotly.js-dist-min';
 import { persisted } from 'svelte-persisted-store';
 import { writable, type Writable } from 'svelte/store';
 import type { CollectionData, PlotData, UserData } from '../../functions/api/utils';
+import { relativeTimeFromDates } from './timehelper';
 
 /**
  * Whether the user is logged in.
@@ -124,7 +125,7 @@ export let collection = persisted('lastViewedCollection', {} as (CollectionData 
 /**
  * A map of plot IDs to their long and short time strings.
  */
-export let dates : Map<string, {long_time: string, short_time: string}> = new Map()
+export let dates : Map<string, {long_time: string, short_time: string, relative: string}> = new Map()
 
 /**
  * The cached plots (*actual plot data, not metadata*).
@@ -160,7 +161,11 @@ const short_format = Intl.DateTimeFormat('default', {day: 'numeric', month:'shor
 export function updateDates(data: Map<string, PlotMetadata>) {
     data.forEach((value, key) => {
         const d = new Date(value.time_created);
-        dates.set(key, {long_time: d.toLocaleString(), short_time: short_format.format(d)});
+        dates.set(key, {
+            long_time: d.toLocaleString(),
+            short_time: short_format.format(d),
+            relative: relativeTimeFromDates(d)
+        });
     });
     console.log("dates calcd")
     // console.log(dates);

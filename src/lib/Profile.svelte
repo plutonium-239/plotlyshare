@@ -31,8 +31,8 @@
         } catch (e) {
             $loggedIn = false;
             $profile = {uid: 'demo_plots'} as ProfileAPIResponse
-            console.error(e);
             console.log("NOT LOGGED IN");
+            console.error("reason:", e);
         }
     }
     async function logInToast() {
