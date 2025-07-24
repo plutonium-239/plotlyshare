@@ -13,6 +13,6 @@ export default defineConfig({
   },
   appType: "mpa",
   build: {
-    sourcemap: true
+    sourcemap: false
   }
 })
