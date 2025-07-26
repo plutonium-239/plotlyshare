@@ -37,7 +37,11 @@
         sharingModal.showModal();
     }
     async function sharingPlotAPIrequest() {
-        if (!plotInSharing) return
+        if (plotInSharing === undefined || !plotInSharing) return;
+        if ($profile.uid === "demo_plots" || plotInSharing.id.startsWith("demo.")) {
+            alert("Changes to demo plots are disabled.");
+            return;
+        }
         await fetch(`/api/plot/${$profile.uid}/${plotInSharing.id}`, {
             method: 'PATCH',
             headers: {
@@ -204,6 +208,13 @@
             <h3 class="text-lg font-bold underline decoration-dotted text-secondary">
                 {plotInSharing.plot.public ? "anyone with the link" : "you"}
             </h3>
+            {#if plotInSharing.plot.public}
+                <p class="max-w-sm bg-secondary/15 rounded-xl p-1 overflow-hidden overflow-ellipsis text-nowrap">
+                    <a href="#/plot/{$profile.uid}/{plotInSharing.id}">
+                        https://plotlyshare.pages.dev/#/plot/{$profile.uid}/{plotInSharing.id}
+                    </a>
+                </p>
+            {/if}
             <button class="btn btn-primary w-1/2" on:click={sharingPlotAPIrequest}>
                 Turn {plotInSharing.plot.public ? "off" : "on"} sharing
             </button>

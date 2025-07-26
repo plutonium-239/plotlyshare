@@ -44,7 +44,6 @@ export async function verifyAndDecodeJWT(
         find(c => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
 
     console.log('signedjwt', signedjwt);
-    // TODO split OR, handle each with different response
     if (signedjwt === undefined) {
         return Response.json(
             { error: "No credentials were provided, please log in." },
