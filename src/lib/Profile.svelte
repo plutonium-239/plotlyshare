@@ -15,7 +15,7 @@
     let cliTokenShown = false
     let tokenRegenerated = false
     
-    
+    let loginErrorReason = 'Your session has expired, please log in again.'
     async function logIn() {
         try {
             let data: ProfileAPIResponse | {error: string} 
@@ -33,6 +33,7 @@
             $profile = {uid: 'demo_plots'} as ProfileAPIResponse
             console.log("NOT LOGGED IN");
             console.error("reason:", e);
+            loginErrorReason = `${e}`;
         }
     }
     async function logInToast() {
@@ -43,7 +44,7 @@
         }), {
 			loading: 'Logging in...',
 			success: 'Logged in',
-			error: 'Your session has expired, please log in again.'
+			error: loginErrorReason
 		});
 	}
     logInToast()

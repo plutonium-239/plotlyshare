@@ -45,7 +45,7 @@
         {#each [...$data].sort((a, b) => b[1].timestamp - a[1].timestamp) as [key, item] (key) }
             <tr>
                 <td>
-                    <div class="col-name-outer">
+                    <div class="col-name-outer select-all">
                         {item.name}
                         <!-- <form action="{{ url_for('update_name', key=item) }}" method="post">
                             <textarea contentEditable="plaintext-only" data-enable-grammarly="false" rows="1" name="name_holder" class="col-name form-control-plaintext" value="{{ meta[item].name }}">{{ meta[item].name }}</textarea>
@@ -61,7 +61,7 @@
                     </a> 
                 </td>
                 <td class='max-xl:hidden'>
-                    <span class="tooltip tooltip-accent" data-tip={key}>
+                    <span class="tooltip tooltip-accent select-all" data-tip={key}>
                         <div class="max-w-32 overflow-hidden overflow-ellipsis">
                             { key }
                         </div>

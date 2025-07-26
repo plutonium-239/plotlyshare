@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { cachedPlots, data, forceDarkPlots, loggedIn, plotTitle, type CachedPlot, type PlotFullData } from './data';
+    import type { UserData } from '../../functions/api/utils';
         // import Plotly from 'plotly.js-dist-min'
     export let params: any;
     
@@ -22,6 +23,7 @@
     //     plotID = plotID.slice(5)
     //     console.log("demo plot detected, changed id to", plotID);
     // }
+    $plotTitle = "Fetching plot"
     
     $: if (window.Plotly) {
         loadingProgress = "Plotting Plotly Plot 😙\nFetching data"
@@ -38,6 +40,7 @@
             plotData = $cachedPlots.get(`${userID}/${plotID}`)!
             plotjson = plotData.plot_data
             plotLoaded = true
+            $plotTitle = plotData.name
         } else if (!$loggedIn && $data.has(plotID)) {
             console.log("Got demo plot");
             const plotinfo = $data.get(plotID)!
@@ -45,8 +48,17 @@
             plotURL = plotinfo.linked_file
             plotData.name = plotinfo.name
             plotData.timestamp = plotinfo.timestamp
+            $plotTitle = plotData.name
+        } else if ($loggedIn && userID === 'demo_plots') {
+            console.log("Got demo plot");
+            const demoPlots = await fetch('/public-filtered.json').then(res => res.json()) as UserData;
+            plotURL = demoPlots.plots[plotID].linked_file;
+            plotData.name = demoPlots.plots[plotID].name;
+            plotData.timestamp = demoPlots.plots[plotID].timestamp;
+            $plotTitle = plotData.name;
         } else {
             plotURL = `/api/plot/${userID}/${plotID}`
+            $plotTitle = "Fetching shared plot"
         }
         if (plotURL) {
             console.log("entered fetcher with", plotURL);
@@ -113,11 +125,14 @@
     }
 
     let PlotlyjsLoaded = false
-    const ensurePlotly = async () => {
-        if (!PlotlyjsLoaded && !window.Plotly) {
-            await new Promise((resolve) => {
-                setTimeout(resolve, 500)
-            });
+    async function ensurePlotly() {
+        if (!PlotlyjsLoaded) {
+            console.log("Plotly not defined, waiting for 500ms");
+            await new Promise((resolve) => { setInterval(() => {
+                if (PlotlyjsLoaded || window.Plotly) resolve(null);
+                console.log("still waiting");
+            }, 500) });
+            console.log(`Plotly now is: ${window.Plotly}`);
             PlotlyjsLoaded = true;
         }
     }
@@ -135,9 +150,9 @@
     id="plotContainer"
     bind:this={plotContainer}
 >
-    {#if !plotLoaded}
-        <div class:skeleton={!plotLoaded}
-            class="[animation-duration:1s] text-center flex justify-center items-center whitespace-pre-wrap"
+    {#if !plotLoaded || !PlotlyjsLoaded}
+        <div class:skeleton={!plotLoaded || !PlotlyjsLoaded}
+            class="[animation-duration:1s] relative top-1/2 text-center flex justify-center items-center whitespace-pre-wrap"
         >
             {loadingProgress}
         </div>
