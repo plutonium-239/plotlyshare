@@ -1,19 +1,8 @@
-import jwt from '@tsndr/cloudflare-worker-jwt';
 import { google, type OAuthTokens } from "../../../worker-auth-providers";
 import type { Google } from '../../../worker-auth-providers/dist/providers/google';
-import { JWT_EXPIRY_TIME, Stats, createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
+import { Stats, createFirestoreDocument, drivePutMeta, hashThis, makeAPIfetch, makeRESTdocURL, type BasicProfileInKV, type Env, type ProfileInFirestore } from '../../utils';
+import { makeCookie } from "../authutils";
 import { onRequestGet as redirectRequest } from './redirect';
-
-
-function generateJWT(rid: string, env: Env) {
-    const claims: any = {
-        user_id: rid,
-    };
-    const secret = env.ENCODE_JWT_TOKEN;
-    console.log("[claims, secret]", claims, secret);
-    return jwt.sign({ exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY_TIME, ...claims }, secret, { algorithm: "HS256" });
-}
-
 
 async function createUser(user: Google.CallbackResponse, env: Env, context: EventContext<Env, any, Record<string, unknown>>) {
     // const existing = await makeAPIfetch(makeRESTdocURL(env, 'users', `${user.user.id}`), env)
@@ -147,11 +136,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
         await createUser(user, context.env, context);
 
-        const jwt = await generateJWT(await hashThis(user.user.id), context.env);
-        console.log("[jwt]", jwt);
-        const expiry = new Date();
-        expiry.setTime(expiry.getTime() + JWT_EXPIRY_TIME * 1000); // 1000 refers to milliseconds
-        // expiry.setTime(expiry.getTime() + 10000); // 10 seconds
         return Response.json(
             user,
             {
@@ -159,7 +143,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                 headers: {
                     location: "/",
                     // TODO: make file auth-utils.ts and add cookie/jwt code to that
-                    "Set-Cookie": `__Session-worker.auth.providers-token=${jwt}; Secure; HttpOnly; SameSite=Lax; Expires=${expiry.toUTCString()}; path=/;`,
+                    "Set-Cookie": await makeCookie(await hashThis(user.user.id), context.env),
                 },
             }
         );

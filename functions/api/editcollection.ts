@@ -1,4 +1,5 @@
-import { createFirestoreDocument, makeAPIfetch, makeRESTdocURL, verifyCLIToken, type Env } from "./utils";
+import { verifyCLIToken } from "./auth/authutils";
+import { createFirestoreDocument, makeAPIfetch, makeRESTdocURL, type Env } from "./utils";
 
 export type PlotFormData = {
     plot_data: string,

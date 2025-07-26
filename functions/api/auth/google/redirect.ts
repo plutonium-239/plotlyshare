@@ -1,5 +1,5 @@
 import { google } from "../../../worker-auth-providers";
-import { verifyAndDecodeJWT, type Env } from "../../utils";
+import { type Env } from "../../utils";
 
 export const onRequestGet : PagesFunction<Env> = async (context) => {
     console.log(`RECEIVED REDIRECT REQUEST, ${[context.env.SHOULD_GOOGLE_PROMPT]}`);

@@ -1,4 +1,5 @@
-import { verifyCLIToken, type Env } from "../utils";
+import { type Env } from "../utils";
+import { verifyCLIToken } from "./authutils";
 
 export const onRequest: PagesFunction<Env> = async (context) => {
 

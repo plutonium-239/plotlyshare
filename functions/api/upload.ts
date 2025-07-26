@@ -1,5 +1,6 @@
-import { BasicProfileInKV, PlotData, createFirestoreDocument, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, verifyCLIToken, type Env } from "./utils";
+import { BasicProfileInKV, PlotData, createFirestoreDocument, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, type Env } from "./utils";
 import { OAuthTokens, google } from "../worker-auth-providers/dist";
+import { verifyCLIToken } from "./auth/authutils";
 
 export type PlotFormData = {
     plot_data: string,

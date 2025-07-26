@@ -1,7 +1,8 @@
 import queryString from "query-string";
 import { google } from "../../worker-auth-providers/dist";
 import { OAuthTokens } from "../../worker-auth-providers/dist/types";
-import { BasicProfileInKV, createFirestoreDocument, driveGet, drivePutMeta, makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, verifyCLIToken, type Env, type PlotData } from "../utils";
+import { BasicProfileInKV, createFirestoreDocument, driveGet, makeAPIfetch, makeRESTdocURL, type Env, type PlotData } from "../utils";
+import { verifyAndDecodeJWT } from "../auth/authutils";
 
 // ! GET for getting plot data
 

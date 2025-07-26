@@ -1,9 +1,9 @@
-import type { PlotlyDataLayoutConfig } from "plotly.js-dist-min";
-import { BasicProfileInKV, CollectionData, PlotData, createFirestoreDocument, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, verifyCLIToken, type Env } from "./utils";
+import { unzipSync } from "fflate";
 import { OAuthTokens, google } from "../worker-auth-providers/dist";
 import { makeNewCollection } from "./newcollection";
-import { unzipSync } from "fflate";
 import { PlotFormData } from "./upload";
+import { BasicProfileInKV, CollectionData, PlotData, createFirestoreDocument, drivePutMultipart, hashThis, makeAPIfetch, makeRESTdocURL, type Env } from "./utils";
+import { verifyAndDecodeJWT, verifyCLIToken } from "./auth/authutils";
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
     let t0 = performance.now()

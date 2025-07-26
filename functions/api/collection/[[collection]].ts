@@ -1,6 +1,5 @@
-import { google } from "../../worker-auth-providers/dist";
-import { OAuthTokens } from "../../worker-auth-providers/dist/types";
-import { BasicProfileInKV, CollectionData, driveGet, makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, type Env, type PlotData } from "../utils";
+import { verifyAndDecodeJWT } from "../auth/authutils";
+import { CollectionData, makeAPIfetch, makeRESTdocURL, type Env } from "../utils";
 
 
 export const onRequest: PagesFunction<Env> = async (context) => {

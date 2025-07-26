@@ -1,4 +1,5 @@
-import { CollectionData, DocumentFields, UserData, createFirestoreDocument, makeAPIfetch, makeRESTdocURL, verifyAndDecodeJWT, verifyCLIToken, type Env } from "./utils";
+import { verifyAndDecodeJWT, verifyCLIToken } from "./auth/authutils";
+import { CollectionData, DocumentFields, UserData, createFirestoreDocument, makeAPIfetch, makeRESTdocURL, type Env } from "./utils";
 
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {

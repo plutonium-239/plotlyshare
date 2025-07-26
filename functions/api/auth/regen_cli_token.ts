@@ -1,4 +1,5 @@
-import { verifyAndDecodeJWT, type Env } from "../utils";
+import { type Env } from "../utils";
+import { verifyAndDecodeJWT } from "./authutils";
 
 export async function makeNewCLIToken(env: Env, uid: string) {
     const cli_token = crypto.randomUUID()
