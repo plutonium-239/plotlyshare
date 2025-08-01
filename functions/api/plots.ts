@@ -15,10 +15,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const collectionsPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid, 'collections'), context)
     const rootCollsPromise = makeAPIfetch(makeRESTdocURL(context.env, 'userdata', uid), context)
     const [plots, collections, profile] = await Promise.all([plotDataPromise, collectionsPromise, rootCollsPromise])
-    console.log({profile});
+    // console.log({profile});
     if (profile.rootCollections.length === 0 && Object.keys(collections).length !== 0) {
         console.error("rootCollections length is 0!");
-        console.log(collections);
+        // console.log(collections);
     }
     delete collections.root;
     const userData: UserData = {

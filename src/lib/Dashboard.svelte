@@ -4,7 +4,7 @@
   import BreadCrumbs from './dashboard/BreadCrumbs.svelte';
 
     import type { UserData } from '../../functions/api/utils';
-    import { collections, collection, dashboardView, data, getDemoMetadata, loggedIn, savedCollections, savedData, updateDates, updatePlotsNotInCollections, rootCollections, plotsNotInCollections, type PlotMetadata, profile } from './data';
+    import { collections, collection, dashboardView, data, getDemoMetadata, loggedIn, savedCollections, savedData, updateDates, updatePlotsNotInCollections, rootCollections, plotsNotInCollections, type PlotMetadata, profile, docTitle, plotTitle } from './data';
     import Grid from './dashboard/Grid.svelte';
     import Table from './dashboard/Table.svelte';
     import TableIcon from './icons/table.svg?raw';
@@ -13,6 +13,8 @@
     import PlotIcon from './icons/icon-nobg.svg?raw'
     import GridIcon from './icons/list-grid.svg?raw';
     import RefreshIcon from './icons/refresh.svg?raw';
+    import CopyIcon from './icons/copy.svg?raw'
+
     import Folder from './dashboard/Folder.svelte';
     import { toast } from 'svoast';
     import FolderCard from './dashboard/FolderCard.svelte';
@@ -67,6 +69,8 @@
     // console.log({location});
 
     // ! INIT
+    $docTitle = "PlotlyShare ● Dashboard"
+    $plotTitle = "All Plots"
     $collections = $savedCollections
     $data = $savedData
 
@@ -209,11 +213,16 @@
                 {plotInSharing.plot.public ? "anyone with the link" : "you"}
             </h3>
             {#if plotInSharing.plot.public}
-                <p class="max-w-sm bg-secondary/15 rounded-xl p-1 overflow-hidden overflow-ellipsis text-nowrap">
-                    <a href="#/plot/{$profile.uid}/{plotInSharing.id}">
-                        https://plotlyshare.pages.dev/#/plot/{$profile.uid}/{plotInSharing.id}
-                    </a>
-                </p>
+                {@const link = "https://plotlyshare.pages.dev/#/plot/" + $profile.uid + "/" + plotInSharing.id}
+                <button title="Copy Link" class="btn btn-outline btn-secondary" on:click={() => navigator.clipboard.writeText(link)}>
+                    <div class="h-6 w-6">
+                        {@html CopyIcon}
+                    </div>
+                    <!-- <div class="divider divider-horizontal"/> -->
+                    <p class="max-w-[20ch] sm:max-w-sm overflow-hidden overflow-ellipsis text-nowrap">
+                        {link}
+                    </p>
+                </button>
             {/if}
             <button class="btn btn-primary w-1/2" on:click={sharingPlotAPIrequest}>
                 Turn {plotInSharing.plot.public ? "off" : "on"} sharing

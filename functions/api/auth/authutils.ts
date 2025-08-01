@@ -7,7 +7,7 @@ function generateJWT(rid: string, env: Env) {
         user_id: rid,
     };
     const secret = env.ENCODE_JWT_TOKEN;
-    console.log("[claims, secret]", claims, secret);
+    // console.log("[claims, secret]", claims, secret);
     return jwt.sign({ exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY_TIME, ...claims }, secret, { algorithm: "HS256" });
 }
 
@@ -19,7 +19,7 @@ function generateJWT(rid: string, env: Env) {
  */
 export async function makeCookie(rid: string, env: Env): Promise<string> {
     const jwt = await generateJWT(rid, env);
-    console.log("[jwt]", jwt);
+    // console.log("[jwt]", jwt);
     const expiry = new Date();
     expiry.setTime(expiry.getTime() + JWT_EXPIRY_TIME * 1000); // 1000 refers to milliseconds
     // expiry.setTime(expiry.getTime() + 10000); // 10 seconds
@@ -33,6 +33,9 @@ type DecryptedJWT = {
 }
 
 // export const JWT_EXPIRY_TIME = 60
+/**
+ * in seconds
+ */
 export const JWT_EXPIRY_TIME = 7*24*3600
 
 export async function verifyAndDecodeJWT(
@@ -41,9 +44,9 @@ export async function verifyAndDecodeJWT(
 ): Promise<Response | { uid: string, basicProfile: BasicProfileInKV, exp: number }> {
     const request = context.request
     const signedjwt = request.headers.get('Cookie')?.split('; ').
-        find(c => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
+        find((c: string) => c.startsWith('__Session-worker.auth.providers-token='))?.split("=")[1]
 
-    console.log('signedjwt', signedjwt);
+    // console.log('signedjwt', signedjwt);
     if (signedjwt === undefined) {
         return Response.json(
             { error: "No credentials were provided, please log in." },

@@ -1,3 +1,4 @@
+import tailwindTypography from '@tailwindcss/typography'
 import daisyui from 'daisyui';
 
 /** @type {import('tailwindcss').Config} */
@@ -6,13 +7,14 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [daisyui],
+  plugins: [tailwindTypography, daisyui],
   daisyui: {
     themes: [
       {
         mytheme: {
           "primary": "#e685b5",
           "secondary": "#22d3ee",
+          // "secondary": "#7fe2e7",
           "accent": "#f0abfc",
           // "accent": "#9381FF",
           "neutral": "#ffe4e6",

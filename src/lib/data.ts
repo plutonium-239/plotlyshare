@@ -153,6 +153,12 @@ export let profile = persisted('cachedProfile', {uid: 'demo_plots'} as ProfileAP
  */
 export let plotTitle = writable("Fetching plot name...")
 
+
+/**
+ * The page head title.
+ */
+export let docTitle = writable("PlotlyShare")
+
 const short_format = Intl.DateTimeFormat('default', {day: 'numeric', month:'short', hour:'numeric', minute:'numeric', hour12:false});
 /**
  * Updates the dates map with the long and short time strings for each plot.
